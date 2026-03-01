@@ -23,15 +23,14 @@ jobs:
             set -e
             echo "=== SSH OK. Iniciando deploy na VPS ==="
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" || true
             if ! command -v node &>/dev/null; then
               echo "Instalando Node 20 (nvm)..."
               curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-              export NVM_DIR="$HOME/.nvm"
-              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-              nvm install 20
-              nvm use 20
             fi
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            nvm install 20 2>/dev/null || true
+            nvm use 20
+            echo "Node: $(node -v) | npm: $(npm -v)"
             APP_DIR="$HOME/mindweavr"
             REPO_URL="https://github.com/${{ github.repository }}.git"
             if [ -n "${{ secrets.GH_DEPLOY_TOKEN }}" ]; then
