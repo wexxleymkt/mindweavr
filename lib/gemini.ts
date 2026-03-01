@@ -469,7 +469,7 @@ async function callModel(model: string, prompt: string, attachment?: Attachment)
   for (const version of ['v1', 'v1beta']) {
     try {
       let res = await doFetch(version);
-      if ((res.status === 429 || res.status === 503) && res.status !== 404) {
+      if (res.status === 429 || res.status === 503) {
         await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         res = await doFetch(version);
       }
