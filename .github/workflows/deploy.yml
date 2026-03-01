@@ -38,14 +38,13 @@ jobs:
               REPO_URL="https://x-access-token:${{ secrets.GH_DEPLOY_TOKEN }}@github.com/${{ github.repository }}.git"
             fi
             echo "=== Clone/update repo ==="
-            if [ ! -d "$APP_DIR" ]; then
+            if [ ! -d "$APP_DIR/.git" ]; then
+              rm -rf "$APP_DIR"
               git clone "$REPO_URL" "$APP_DIR"
-              cd "$APP_DIR"
-            else
-              cd "$APP_DIR"
-              git fetch origin
-              git reset --hard origin/main
             fi
+            cd "$APP_DIR"
+            git fetch origin
+            git reset --hard origin/main
             echo "=== npm ci ==="
             npm ci
             echo "=== npm run build ==="
