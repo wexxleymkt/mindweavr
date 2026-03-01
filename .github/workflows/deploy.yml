@@ -1,10 +1,10 @@
-# Deploy MindWeavr para VPS Hostinger ao dar push em main
+# Deploy MindWeavr para VPS Hostinger via SSH (opcional).
+# Deploy automático recomendado: webhook GitHub → /api/deploy-webhook (veja DEPLOY-GUIA.md).
 name: Deploy to VPS
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_dispatch:  # só manual; deploy automático é via webhook no repo
+  # push: { branches: [main] }  # desativado: use webhook para evitar timeout SSH
 
 jobs:
   deploy:

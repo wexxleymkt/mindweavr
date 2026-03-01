@@ -1,53 +1,20 @@
 # Deploy MindWeavr — GitHub + Hostinger VPS
 
-## Passo 1: Criar o repositório no GitHub
-
-1. Acesse [github.com/new](https://github.com/new).
-2. **Repository name:** `mindweavr` (ou outro nome; anote o `usuario/mindweavr`).
-3. Deixe **Private** ou **Public** (para repositório privado você vai precisar do secret `GH_DEPLOY_TOKEN` no passo 3).
-4. **Não** marque "Add a README" (o projeto já tem código).
-5. Clique em **Create repository**.
+Fluxo igual ao Thumbfly: **código no GitHub** e **deploy na Hostinger VPS**. O deploy automático é feito por **webhook**: quando você dá push em `main`, o GitHub envia um POST para a sua aplicação na VPS e ela roda `git pull` + build + restart. Não precisa de SSH de fora (evita timeout de firewall).
 
 ---
 
-## Passo 2: Adicionar os Secrets do repositório
+## Visão geral
 
-1. Abra o repositório criado → **Settings** → **Secrets and variables** → **Actions**.
-2. Clique em **New repository secret** e crie **um secret por linha**:
-
-| Nome           | Valor |
-|----------------|--------|
-| `VPS_HOST`     | `187.77.229.241` |
-| `VPS_USER`     | `root` |
-| `VPS_PASSWORD` | *(a senha root da VPS que você informou)* |
-
-**Importante:** não coloque a senha em nenhum arquivo do projeto; só nos Secrets do GitHub.
-
-Se o repositório for **privado**, crie também:
-
-| Nome               | Valor |
-|--------------------|--------|
-| `GH_DEPLOY_TOKEN`  | Um Personal Access Token (classic) com escopo **repo** (para o workflow clonar na VPS). |
-
-**Para o build funcionar na VPS**, o workflow precisa de variáveis de ambiente. Você pode:
-
-- **Opção A:** Criar `.env.local` na VPS uma vez (SSH + `nano ~/mindweavr/.env.local`). O workflow preserva esse arquivo ao atualizar o código.
-- **Opção B:** Adicionar estes secrets no repo; o workflow criará `.env.local` na VPS quando o arquivo não existir:
-
-| Nome | Valor |
-|------|--------|
-| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave anon do Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key do Supabase |
-| `NEXT_PUBLIC_GEMINI_API_KEY` | Chave da API Gemini |
-| `PERFECTPAY_TOKEN` | Token público Perfect Pay |
-| `NEXT_PUBLIC_APP_URL` | `https://mindweavr.app` |
+1. **Uma vez:** subir a app na VPS (clone, `.env.local`, build, PM2, opcional: nginx + domínio).
+2. **Uma vez:** configurar no GitHub um webhook que chama `https://mindweavr.app/api/deploy-webhook` (ou `http://IP_DA_VPS:3000/api/deploy-webhook` se ainda não tiver domínio).
+3. **Sempre que der push em `main`:** o GitHub dispara o webhook e a VPS faz o deploy sozinha.
 
 ---
 
-## Passo 3: Primeiro push do projeto
+## Passo 1: Repositório no GitHub
 
-No terminal, na pasta do projeto:
+O repositório já está em **https://github.com/wexxleymkt/mindweavr**. Se for criar outro ou fazer o primeiro push:
 
 ```bash
 git init
@@ -58,56 +25,74 @@ git remote add origin https://github.com/SEU_USUARIO/mindweavr.git
 git push -u origin main
 ```
 
-Substitua `SEU_USUARIO` pelo seu usuário ou organização do GitHub.
-
-Após o push, o workflow **Deploy to VPS** será disparado. Na primeira vez a VPS vai:
-
-- Instalar Node 20 (via nvm) se não existir
-- Clonar o repositório em `~/mindweavr`
-- Rodar `npm ci` e `npm run build`
-- Subir a app com PM2 (nome `mindweavr`)
-
 ---
 
-## Passo 4: Variáveis de ambiente na VPS (obrigatório)
+## Passo 2: Deploy inicial na VPS (uma vez)
 
-Na primeira vez (ou se ainda não fez), entre na VPS e crie o `.env.local` da aplicação:
+Entre na VPS pela Hostinger (SSH pelo painel ou `ssh root@IP_DA_VPS`).
+
+### 2.1 Node.js (NVM)
 
 ```bash
-ssh root@187.77.229.241
-cd ~/mindweavr
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc   # ou feche e abra o terminal
+nvm install 20
+nvm use 20
+```
+
+### 2.2 Clonar o projeto e buildar
+
+```bash
+cd ~
+git clone https://github.com/wexxleymkt/mindweavr.git
+cd mindweavr
+```
+
+Crie o `.env.local` com as variáveis do Supabase, Gemini, Perfect Pay e o **secret do webhook**:
+
+```bash
 nano .env.local
 ```
 
-Coloque as mesmas variáveis que você usa em desenvolvimento, por exemplo:
+Conteúdo (ajuste com seus valores):
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://msxswthxpwhwdbhfrsef.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_anon_key
+SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
 NEXT_PUBLIC_GEMINI_API_KEY=sua_chave_gemini
+PERFECTPAY_TOKEN=seu_token
+NEXT_PUBLIC_APP_URL=https://mindweavr.app
+
+# Secret que o GitHub enviará no webhook (invente uma string longa e segura)
+DEPLOY_WEBHOOK_SECRET=uma_string_longa_e_secreta_que_voce_escolher
 ```
 
-Salve (Ctrl+O, Enter, Ctrl+X) e reinicie a app:
+Salve (Ctrl+O, Enter, Ctrl+X).
 
 ```bash
-pm2 restart mindweavr
+npm ci
+npm run build
+npm install -g pm2
+pm2 start npm --name mindweavr -- start
+pm2 save
+pm2 startup   # segue as instruções para iniciar o PM2 no boot
 ```
 
----
+A app fica rodando na porta 3000. Se ainda não tiver domínio, teste com `http://IP_DA_VPS:3000`.
 
-## Passo 5: Domínio mindweavr.app
+### 2.3 Domínio e HTTPS (opcional)
 
-Quando quiser usar o domínio:
+Para usar **mindweavr.app**:
 
-1. **DNS:** No painel do registrador do domínio (onde você comprou mindweavr.app), crie um registro **A** apontando para `187.77.229.241`.
-2. **HTTPS (recomendado):** Na VPS, instale nginx e certbot e configure proxy reverso para a porta 3000 e SSL. Exemplo rápido:
+1. **DNS:** No painel do registrador do domínio, crie um registro **A** apontando para o IP da VPS.
+2. **Nginx + Certbot na VPS:**
 
 ```bash
 apt update && apt install -y nginx certbot python3-certbot-nginx
-certbot --nginx -d mindweavr.app
 ```
 
-E um site em `/etc/nginx/sites-available/mindweavr`:
+Crie o site (ex.: `/etc/nginx/sites-available/mindweavr`):
 
 ```nginx
 server {
@@ -124,18 +109,43 @@ server {
 }
 ```
 
-Depois: `ln -s /etc/nginx/sites-available/mindweavr /etc/nginx/sites-enabled/` e `nginx -t && systemctl reload nginx`.
+Ative e pegue o certificado:
+
+```bash
+ln -s /etc/nginx/sites-available/mindweavr /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+certbot --nginx -d mindweavr.app
+```
+
+---
+
+## Passo 3: Webhook no GitHub (deploy automático)
+
+1. Abra o repositório no GitHub → **Settings** → **Webhooks** → **Add webhook**.
+2. **Payload URL:**  
+   - Se já tiver domínio: `https://mindweavr.app/api/deploy-webhook`  
+   - Se ainda não: `http://IP_DA_VPS:3000/api/deploy-webhook` (depois troque para o domínio).
+3. **Content type:** `application/json`.
+4. **Secret:** o **mesmo** valor que você colocou em `DEPLOY_WEBHOOK_SECRET` no `.env.local` da VPS.
+5. **Which events:** "Just the push event" (ou "Let me select individual events" e marque **Push**).
+6. Salve (**Add webhook**).
+
+A partir daí, a cada **push na branch `main`**, o GitHub envia um POST para essa URL. A aplicação na VPS valida o secret e dispara em background: `git pull origin main`, `npm ci`, `npm run build` e `pm2 restart mindweavr`.
 
 ---
 
 ## Resumo
 
-| Onde              | O que fazer |
-|-------------------|-------------|
-| GitHub            | Criar repositório e adicionar Secrets: `VPS_HOST`, `VPS_USER`, `VPS_PASSWORD` (e `GH_DEPLOY_TOKEN` se for repo privado). |
-| Projeto           | `git init`, `git add .`, `git commit`, `git remote add origin`, `git push -u origin main`. |
-| VPS (uma vez)     | Criar `~/mindweavr/.env.local` com Supabase e Gemini; `pm2 restart mindweavr`. |
-| DNS               | Apontar mindweavr.app (A) para `187.77.229.241`. |
-| HTTPS (opcional)  | Nginx + Certbot na VPS e proxy para porta 3000. |
+| Onde | O que fazer |
+|------|-------------|
+| GitHub | Repo com o código (ex.: wexxleymkt/mindweavr). Webhook apontando para `https://mindweavr.app/api/deploy-webhook` com o mesmo secret do `.env.local`. |
+| VPS (uma vez) | Node 20 (nvm), clone do repo, `.env.local` (incluindo `DEPLOY_WEBHOOK_SECRET`), `npm ci`, `npm run build`, PM2. Opcional: nginx + Certbot para domínio e HTTPS. |
+| Depois | Cada `git push origin main` dispara o webhook e a VPS faz o deploy sozinha. |
 
-O workflow está em `.github/workflows/deploy.yml`: a cada **push em `main`** o deploy roda de novo na VPS.
+Não é necessário abrir SSH (porta 22) para o GitHub nem usar GitHub Actions para deploy; o fluxo é **GitHub → POST no seu app → deploy na VPS**.
+
+---
+
+## Opcional: deploy via GitHub Actions (SSH)
+
+Se preferir que o deploy seja feito por um workflow que entra na VPS por SSH (em vez do webhook), use o workflow em `.github/workflows/deploy.yml`. Ele está configurado para rodar **só manualmente** (Actions → Deploy to VPS → Run workflow). Para isso funcionar, a VPS precisa aceitar conexões SSH na porta 22 a partir da internet (firewall/painel Hostinger). Os secrets necessários estão descritos no próprio workflow (`VPS_HOST`, `VPS_USER`, `VPS_PASSWORD`, e opcionalmente os de ambiente para criar `.env.local`).
