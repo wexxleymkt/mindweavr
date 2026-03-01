@@ -21,6 +21,7 @@ jobs:
           script_stop: true
           script: |
             set -e
+            set -o pipefail
             echo "=== SSH OK. Iniciando deploy na VPS ==="
             export NVM_DIR="$HOME/.nvm"
             if ! command -v node &>/dev/null; then
@@ -36,6 +37,7 @@ jobs:
             if [ -n "${{ secrets.GH_DEPLOY_TOKEN }}" ]; then
               REPO_URL="https://x-access-token:${{ secrets.GH_DEPLOY_TOKEN }}@github.com/${{ github.repository }}.git"
             fi
+            echo "=== Clone/update repo ==="
             if [ ! -d "$APP_DIR" ]; then
               git clone "$REPO_URL" "$APP_DIR"
               cd "$APP_DIR"
@@ -44,8 +46,11 @@ jobs:
               git fetch origin
               git reset --hard origin/main
             fi
+            echo "=== npm ci ==="
             npm ci
+            echo "=== npm run build ==="
             npm run build
+            echo "=== PM2 ==="
             if command -v pm2 &>/dev/null; then
               pm2 restart mindweavr --update-env || pm2 start npm --name mindweavr -- start
               pm2 save
