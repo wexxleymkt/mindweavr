@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Script from 'next/script';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate as fmAnimate } from 'framer-motion';
 import {
   ArrowRight, Check, X, Star, TrendingUp, ChevronRight,
@@ -1847,6 +1848,21 @@ function Footer() {
 export default function LandingPage() {
   return (
     <div style={{ background: C.bg, minHeight: '100vh', color: C.text }}>
+      {/* UTMify Pixel + Facebook Ads tracking (página de vendas) */}
+      <Script id="utmify-pixel" strategy="afterInteractive">
+        {`window.pixelId = "69a4d1000134f2f5bf10ada0";
+  var a = document.createElement("script");
+  a.setAttribute("async", "");
+  a.setAttribute("defer", "");
+  a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+  document.head.appendChild(a);`}
+      </Script>
+      <Script
+        src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+        strategy="afterInteractive"
+        data-utmify-prevent-xcod-sck
+        data-utmify-prevent-subids
+      />
       <Navbar />
       <HeroSection />
       <PainSection />
