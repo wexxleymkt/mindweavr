@@ -29,6 +29,20 @@ Se o repositório for **privado**, crie também:
 |--------------------|--------|
 | `GH_DEPLOY_TOKEN`  | Um Personal Access Token (classic) com escopo **repo** (para o workflow clonar na VPS). |
 
+**Para o build funcionar na VPS**, o workflow precisa de variáveis de ambiente. Você pode:
+
+- **Opção A:** Criar `.env.local` na VPS uma vez (SSH + `nano ~/mindweavr/.env.local`). O workflow preserva esse arquivo ao atualizar o código.
+- **Opção B:** Adicionar estes secrets no repo; o workflow criará `.env.local` na VPS quando o arquivo não existir:
+
+| Nome | Valor |
+|------|--------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave anon do Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key do Supabase |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | Chave da API Gemini |
+| `PERFECTPAY_TOKEN` | Token público Perfect Pay |
+| `NEXT_PUBLIC_APP_URL` | `https://mindweavr.app` |
+
 ---
 
 ## Passo 3: Primeiro push do projeto

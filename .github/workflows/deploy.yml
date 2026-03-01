@@ -39,10 +39,26 @@ jobs:
             fi
             echo "=== Clone/update repo ==="
             if [ ! -d "$APP_DIR/.git" ]; then
+              [ -f "$APP_DIR/.env.local" ] && cp "$APP_DIR/.env.local" /tmp/mindweavr_env_backup || true
               rm -rf "$APP_DIR"
               git clone "$REPO_URL" "$APP_DIR"
+              [ -f /tmp/mindweavr_env_backup ] && cp /tmp/mindweavr_env_backup "$APP_DIR/.env.local" && echo "Restaurado .env.local" || true
             fi
             cd "$APP_DIR"
+            if [ ! -f .env.local ]; then
+              if [ -n "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then
+                echo "Criando .env.local a partir dos secrets do repo..."
+                printf 'NEXT_PUBLIC_SUPABASE_URL=%s\nNEXT_PUBLIC_SUPABASE_ANON_KEY=%s\nSUPABASE_SERVICE_ROLE_KEY=%s\nNEXT_PUBLIC_GEMINI_API_KEY=%s\nPERFECTPAY_TOKEN=%s\nNEXT_PUBLIC_APP_URL=%s\n' \
+                  "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
+                  "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+                  "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+                  "${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}" \
+                  "${{ secrets.PERFECTPAY_TOKEN }}" \
+                  "${{ secrets.NEXT_PUBLIC_APP_URL }}" > .env.local
+              else
+                echo "AVISO: .env.local nao existe e secrets de env nao configurados. Adicione em Settings > Secrets: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, etc. Ou crie .env.local na VPS manualmente (ssh root@VPS_HOST, cd ~/mindweavr, nano .env.local)."
+              fi
+            fi
             git fetch origin
             git reset --hard origin/main
             echo "=== npm ci ==="
