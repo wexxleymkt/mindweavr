@@ -1,0 +1,55 @@
+# Deploy MindWeavr para VPS Hostinger ao dar push em main
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" || true
+            if ! command -v node &>/dev/null; then
+              echo "Instalando Node 20 (nvm)..."
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              nvm install 20
+              nvm use 20
+            fi
+            APP_DIR="$HOME/mindweavr"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+            if [ -n "${{ secrets.GH_DEPLOY_TOKEN }}" ]; then
+              REPO_URL="https://x-access-token:${{ secrets.GH_DEPLOY_TOKEN }}@github.com/${{ github.repository }}.git"
+            fi
+            if [ ! -d "$APP_DIR" ]; then
+              git clone "$REPO_URL" "$APP_DIR"
+              cd "$APP_DIR"
+            else
+              cd "$APP_DIR"
+              git fetch origin
+              git reset --hard origin/main
+            fi
+            npm ci
+            npm run build
+            if command -v pm2 &>/dev/null; then
+              pm2 restart mindweavr --update-env || pm2 start npm --name mindweavr -- start
+              pm2 save
+            else
+              npm install -g pm2
+              pm2 start npm --name mindweavr -- start
+              pm2 save
+              pm2 startup
+            fi

@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================================
+   INNOVATION DESIGN SYSTEM — extracted from innovation reference
+   Monochromatic, minimalist, Inter + Playfair Display
+============================================================ */
+
+@theme {
+  /* Dark (default) */
+  --color-bg:          #0a0a0a;
+  --color-bg2:         #111111;
+  --color-card:        #141414;
+  --color-border:      rgba(255,255,255,0.08);
+  --color-border-hover:rgba(255,255,255,0.18);
+  --color-text:        #f0f0f0;
+  --color-muted:       #888888;
+  --color-faint:       #555555;
+  --color-accent:      #c8c8c8;
+  --color-glow:        rgba(200,200,200,0.12);
+
+  --radius:    16px;
+  --radius-lg: 24px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --font-sans:   'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif:  'Playfair Display', Georgia, serif;
+}
+
+/* Light mode overrides */
+.light {
+  --color-bg:           #f4f4f4;
+  --color-bg2:          #ebebeb;
+  --color-card:         #ffffff;
+  --color-border:       rgba(0,0,0,0.08);
+  --color-border-hover: rgba(0,0,0,0.2);
+  --color-text:         #0a0a0a;
+  --color-muted:        #555555;
+  --color-faint:        #999999;
+  --color-accent:       #1a1a1a;
+  --color-glow:         rgba(0,0,0,0.06);
+}
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body { height: 100%; overflow-x: hidden; }
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 14px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-faint); }
+
+@keyframes caret-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
