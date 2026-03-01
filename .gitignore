@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# scripts com credenciais (não versionar)
+scripts/setup-vps-env.mjs
+
 # vercel
 .vercel
 
