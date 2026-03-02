@@ -163,8 +163,7 @@ export function Navbar() {
               className="navbar-overlay"
               style={{
                 position: 'fixed',
-                inset: 0,
-                top: 0,
+                top: 56,
                 left: 0,
                 right: 0,
                 bottom: 0,
@@ -173,25 +172,24 @@ export function Navbar() {
               }}
             />
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="navbar-mobile-menu"
               style={{
                 position: 'fixed',
-                top: 0,
+                top: 56,
                 left: 0,
                 right: 0,
-                width: '100%',
                 zIndex: 101,
-                background: C.bg2,
-                borderBottom: `1px solid ${C.border}`,
-                padding: '72px 0 20px',
+                background: C.bg,
+                borderTop: `1px solid ${C.border}`,
+                boxShadow: 'none',
+                padding: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 0,
-                maxHeight: 'calc(100vh - 72px)',
+                maxHeight: 'calc(100vh - 56px)',
                 overflowY: 'auto',
               }}
             >
@@ -205,36 +203,35 @@ export function Navbar() {
                     color: C.text,
                     textDecoration: 'none',
                     fontFamily: fs,
-                    padding: '14px 20px',
+                    padding: '14px 16px',
                     borderBottom: `1px solid ${C.border}`,
+                    background: 'transparent',
                     transition: 'background 0.15s',
                   }}
-                  onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                  onTouchEnd={e => (e.currentTarget.style.background = '')}
+                  onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+                  onTouchEnd={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   {l.label}
                 </a>
               ))}
-              <div style={{ padding: '16px 20px 0' }}>
-                <a
-                  href="/#pricing"
-                  onClick={e => { handleAnchorClick(e, '/#pricing'); closeMenu(); }}
-                  style={{
-                    display: 'block',
-                    padding: '14px 20px',
-                    background: C.text,
-                    color: C.bg,
-                    borderRadius: 6,
-                    fontSize: 15,
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                    textAlign: 'center',
-                    fontFamily: fs,
-                  }}
-                >
-                  Começar agora →
-                </a>
-              </div>
+              <a
+                href="/#pricing"
+                onClick={e => { handleAnchorClick(e, '/#pricing'); closeMenu(); }}
+                style={{
+                  display: 'block',
+                  margin: 16,
+                  padding: '14px 16px',
+                  background: C.text,
+                  color: C.bg,
+                  fontSize: 15,
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  textAlign: 'center',
+                  fontFamily: fs,
+                }}
+              >
+                Começar agora →
+              </a>
             </motion.div>
           </>
         )}
@@ -243,16 +240,27 @@ export function Navbar() {
         @media (max-width: 760px) {
           .nav-links { display: none !important; }
           .mobile-btn { display: flex !important; align-items: center; justify-content: center; }
-          .landing-navbar > div { margin: 12px 16px !important; padding: 0 16px !important; max-width: none !important; border-radius: 100px !important; }
-          .landing-navbar.scrolled > div { margin: 0 !important; padding: 0 16px !important; border-radius: 0 !important; }
+          .landing-navbar > div {
+            margin: 12px 16px !important;
+            padding: 0 16px !important;
+            max-width: none !important;
+            border-radius: 100px !important;
+          }
+          .landing-navbar.scrolled > div {
+            margin: 0 !important;
+            padding: 0 16px !important;
+            border-radius: 0 !important;
+          }
         }
         @media (min-width: 761px) {
           .navbar-overlay, .navbar-mobile-menu { display: none !important; }
         }
-        .navbar-mobile-menu {
+        .navbar-mobile-menu, .navbar-mobile-menu * {
           border-radius: 0 !important;
           box-shadow: none !important;
           outline: none !important;
+        }
+        .navbar-mobile-menu {
           -webkit-tap-highlight-color: transparent;
         }
         .navbar-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
