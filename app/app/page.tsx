@@ -103,8 +103,15 @@ export default function AppPage() {
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
-      const mapData = await res.json();
-      if (!res.ok) throw new Error(mapData.error || `Erro ${res.status}`);
+      const raw = await res.text();
+      let mapData: Record<string, unknown>;
+      try {
+        mapData = JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        if (!res.ok) throw new Error(`Erro ${res.status}: resposta inválida`);
+        throw new Error('Resposta do servidor veio truncada. Tente um tema mais curto ou tente novamente.');
+      }
+      if (!res.ok) throw new Error((mapData.error as string) || `Erro ${res.status}`);
       if (options?.layoutMode)      mapData.layoutMode     = options.layoutMode;
       if (options?.connectionStyle) mapData.connectionStyle = options.connectionStyle;
       setCurrentMap(mapData);

@@ -92,7 +92,15 @@ export async function generateMindMap(
     .replace(/\s*```\s*$/i, '')
     .trim();
 
-  const parsed = JSON.parse(cleaned) as MapData & { annotations?: MapAnnotations };
+  let parsed: MapData & { annotations?: MapAnnotations };
+  try {
+    parsed = JSON.parse(cleaned) as MapData & { annotations?: MapAnnotations };
+  } catch (parseErr) {
+    const msg = parseErr instanceof SyntaxError
+      ? `Resposta da IA veio truncada ou inválida (JSON inválido). Tente um tema mais curto ou gere novamente.`
+      : 'Resposta da IA em formato inesperado.';
+    throw new Error(msg);
+  }
   const data: MapData = {
     title: parsed.title,
     description: parsed.description,
