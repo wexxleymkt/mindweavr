@@ -8,6 +8,12 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 // - customer.email, plan.code, product.code, code (id da venda), sale_amount
 // - sale_status_enum: 2 = approved, 8 = authorized, 10 = completed => ativo
 //                    6 = cancelled, 7 = refunded, 9 = charged_back => revogado
+//
+// ─── Códigos MindWeavr na Perfect Pay ────────────────────────────────────────
+// Produto: PPPBEB66
+// Planos:  Essencial = PPLQQOQSA | Creator = PPLQQOQSE | Pro = PPLQQOQSC
+
+const PRODUCT_CODE_MINDEAVR = 'PPPBEB66';
 
 const PLAN_BY_CODE: Record<string, 'essencial' | 'creator' | 'pro'> = {
   PPLQQOQSA: 'essencial',
@@ -40,27 +46,97 @@ function getPayloadNumber(obj: unknown, key: string): number {
   return 0;
 }
 
+/** Retorna valor de obj[key] ignorando maiúsculas/minúsculas da chave */
+function getByKeyIgnoreCase(obj: unknown, key: string): unknown {
+  if (!obj || typeof obj !== 'object') return undefined;
+  const o = obj as Record<string, unknown>;
+  const k = key.toLowerCase();
+  for (const [pk, pv] of Object.entries(o)) {
+    if (pk.toLowerCase() === k) return pv;
+  }
+  return undefined;
+}
+
+/** Desembrulha payload se vier em data/payload (string ou objeto) */
+function unwrapPayload(raw: Record<string, unknown>): Record<string, unknown> {
+  const data = getByKeyIgnoreCase(raw, 'data') ?? getByKeyIgnoreCase(raw, 'payload');
+  if (typeof data === 'string') {
+    try {
+      return JSON.parse(data) as Record<string, unknown>;
+    } catch {
+      return raw;
+    }
+  }
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    return data as Record<string, unknown>;
+  }
+  return raw;
+}
+
+/** Busca recursiva no payload por string que pareça email */
+function findEmailInPayload(obj: unknown, depth = 0): string {
+  if (depth > 5 || !obj) return '';
+  if (typeof obj === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(obj)) return obj.trim().toLowerCase();
+  if (typeof obj === 'object' && obj !== null) {
+    const o = obj as Record<string, unknown>;
+    if (typeof o.email === 'string') return o.email.trim().toLowerCase();
+    for (const v of Object.values(o)) {
+      const found = findEmailInPayload(v, depth + 1);
+      if (found) return found;
+    }
+  }
+  return '';
+}
+
+/** Busca recursiva por código de plano (ex: PPLQQOQSA). Ignora code da venda (PPC...). */
+function findPlanCodeInPayload(obj: unknown, depth = 0): string {
+  if (depth > 5 || !obj) return '';
+  if (typeof obj === 'string' && /^PPL[A-Z0-9]{5,}$/i.test(obj)) return obj.trim().toUpperCase();
+  if (typeof obj === 'object' && obj !== null) {
+    const o = obj as Record<string, unknown>;
+    if (o.code && typeof o.code === 'string' && /^PPL/i.test(o.code)) return o.code.trim().toUpperCase();
+    for (const v of Object.values(o)) {
+      const found = findPlanCodeInPayload(v, depth + 1);
+      if (found) return found;
+    }
+  }
+  return '';
+}
+
 export async function POST(req: NextRequest) {
   let rawPayload: Record<string, unknown> = {};
 
   try {
-    rawPayload = await req.json();
+    const body = await req.json();
+    rawPayload = typeof body === 'object' && body !== null ? (body as Record<string, unknown>) : {};
   } catch {
     try {
       const text = await req.text();
-      rawPayload = Object.fromEntries(new URLSearchParams(text)) as Record<string, unknown>;
+      const parsed = Object.fromEntries(new URLSearchParams(text)) as Record<string, unknown>;
+      const payloadStr = parsed.payload ?? parsed.data;
+      if (typeof payloadStr === 'string') {
+        try {
+          rawPayload = JSON.parse(payloadStr) as Record<string, unknown>;
+        } catch {
+          rawPayload = parsed;
+        }
+      } else {
+        rawPayload = parsed;
+      }
     } catch {
       return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
     }
   }
 
-  // ─── Extração no formato Perfect Pay (campos aninhados) ───────────────────
-  const customer = (rawPayload.customer as Record<string, unknown>) ?? {};
-  const planObj = (rawPayload.plan as Record<string, unknown>) ?? {};
-  const productObj = (rawPayload.product as Record<string, unknown>) ?? {};
+  rawPayload = unwrapPayload(rawPayload);
 
-  const buyerEmail = getPayloadString(customer, 'email').toLowerCase();
-  const planCode = getPayloadString(planObj, 'code').toUpperCase();
+  // Perfect Pay: customer.email, plan.code (com fallback por capitalização e busca profunda)
+  const customer = (getByKeyIgnoreCase(rawPayload, 'customer') as Record<string, unknown>) ?? {};
+  const planObj = (getByKeyIgnoreCase(rawPayload, 'plan') as Record<string, unknown>) ?? (Array.isArray(rawPayload.plan) ? {} : (rawPayload.plan as Record<string, unknown>) ?? {});
+  const productObj = (getByKeyIgnoreCase(rawPayload, 'product') as Record<string, unknown>) ?? {};
+
+  let buyerEmail = getPayloadString(customer, 'email').toLowerCase();
+  let planCode = getPayloadString(planObj, 'code').toUpperCase();
   const productCode = getPayloadString(productObj, 'code');
   const saleId = getPayloadString(rawPayload, 'code') || getPayloadString(rawPayload, 'sale_id') || getPayloadString(rawPayload, 'id');
   const saleStatusEnum = getPayloadNumber(rawPayload, 'sale_status_enum');
@@ -70,11 +146,13 @@ export async function POST(req: NextRequest) {
     getPayloadString(customer, 'phone_area_code'),
     getPayloadString(customer, 'phone_number'),
   ].filter(Boolean).join('').replace(/\D/g, '');
-  const amount = Number(rawPayload.sale_amount ?? rawPayload.amount ?? rawPayload.sale_amount ?? 0) || getPayloadNumber(rawPayload, 'sale_amount');
+  const amount = Number(rawPayload.sale_amount ?? rawPayload.amount ?? 0) || getPayloadNumber(rawPayload, 'sale_amount');
 
-  // Fallback: se ainda vier em formato “flat” (ex: integração antiga)
-  const email = buyerEmail || getPayloadString(rawPayload, 'buyer_email').toLowerCase() || getPayloadString(rawPayload, 'customer_email').toLowerCase() || getPayloadString(rawPayload, 'email').toLowerCase();
-  const code = planCode || getPayloadString(rawPayload, 'plan_code').toUpperCase() || getPayloadString((rawPayload.plan as Record<string, unknown>) ?? {}, 'code').toUpperCase();
+  if (!buyerEmail) buyerEmail = getPayloadString(rawPayload, 'buyer_email').toLowerCase() || getPayloadString(rawPayload, 'customer_email').toLowerCase() || getPayloadString(rawPayload, 'email').toLowerCase();
+  if (!planCode) planCode = getPayloadString(rawPayload, 'plan_code').toUpperCase() || getPayloadString(planObj, 'code').toUpperCase();
+
+  const email = buyerEmail || findEmailInPayload(rawPayload);
+  const code = planCode || findPlanCodeInPayload(rawPayload);
 
   // ─── Log do evento (para debug) ───────────────────────────────────────────
   const { data: eventRow } = await supabaseAdmin
