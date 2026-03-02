@@ -189,10 +189,11 @@ export function Navbar() {
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
                 borderBottom: `1px solid ${C.border}`,
-                padding: '72px 20px 24px',
+                borderRadius: 0,
+                padding: '72px 16px 20px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 6,
+                gap: 0,
                 maxHeight: 'calc(100vh - 72px)',
                 overflowY: 'auto',
               }}
@@ -203,21 +204,22 @@ export function Navbar() {
                   href={l.href}
                   onClick={e => { handleAnchorClick(e, l.href); closeMenu(); }}
                   style={{
-                    fontSize: 16,
-                    color: C.muted,
+                    fontSize: 15,
+                    color: C.text,
                     textDecoration: 'none',
                     fontFamily: fs,
                     padding: '14px 12px',
-                    borderRadius: 12,
-                    transition: 'background 0.2s, color 0.2s',
+                    borderRadius: 0,
+                    borderBottom: `1px solid ${C.border}`,
+                    transition: 'background 0.2s',
                   }}
-                  onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+                  onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
                   onTouchEnd={e => (e.currentTarget.style.background = '')}
                 >
                   {l.label}
                 </a>
               ))}
-              <div style={{ height: 8 }} />
+              <div style={{ height: 16 }} />
               <Link
                 href="/login"
                 onClick={closeMenu}
@@ -225,13 +227,12 @@ export function Navbar() {
                   padding: '14px 20px',
                   background: C.text,
                   color: C.bg,
-                  borderRadius: 12,
+                  borderRadius: 6,
                   fontSize: 15,
                   fontWeight: 500,
                   textDecoration: 'none',
                   textAlign: 'center',
                   fontFamily: fs,
-                  marginTop: 4,
                 }}
               >
                 Começar agora →
@@ -250,6 +251,7 @@ export function Navbar() {
         @media (min-width: 761px) {
           .navbar-overlay, .navbar-mobile-menu { display: none !important; }
         }
+        .navbar-mobile-menu { border-radius: 0 !important; box-shadow: none !important; }
       `}</style>
     </header>
   );
