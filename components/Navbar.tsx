@@ -167,8 +167,9 @@ export function Navbar() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'rgba(0,0,0,0.5)',
+                background: 'rgba(0,0,0,0.45)',
                 zIndex: 99,
+                boxShadow: 'none',
               }}
             />
             <motion.div
@@ -185,12 +186,16 @@ export function Navbar() {
                 zIndex: 101,
                 background: C.bg,
                 borderTop: `1px solid ${C.border}`,
+                borderLeft: `1px solid ${C.border}`,
+                borderRight: `1px solid ${C.border}`,
                 boxShadow: 'none',
-                padding: 0,
+                borderRadius: 0,
+                padding: '12px 0 20px',
                 display: 'flex',
                 flexDirection: 'column',
                 maxHeight: 'calc(100vh - 56px)',
                 overflowY: 'auto',
+                overflowX: 'hidden',
               }}
             >
               {links.map(l => (
@@ -203,7 +208,7 @@ export function Navbar() {
                     color: C.text,
                     textDecoration: 'none',
                     fontFamily: fs,
-                    padding: '14px 16px',
+                    padding: '14px 20px',
                     borderBottom: `1px solid ${C.border}`,
                     background: 'transparent',
                     transition: 'background 0.15s',
@@ -219,7 +224,7 @@ export function Navbar() {
                 onClick={e => { handleAnchorClick(e, '/#pricing'); closeMenu(); }}
                 style={{
                   display: 'block',
-                  margin: 16,
+                  margin: '16px 20px 0',
                   padding: '14px 16px',
                   background: C.text,
                   color: C.bg,
@@ -255,15 +260,21 @@ export function Navbar() {
         @media (min-width: 761px) {
           .navbar-overlay, .navbar-mobile-menu { display: none !important; }
         }
-        .navbar-mobile-menu, .navbar-mobile-menu * {
+        .navbar-mobile-menu,
+        .navbar-mobile-menu * {
           border-radius: 0 !important;
           box-shadow: none !important;
           outline: none !important;
         }
         .navbar-mobile-menu {
           -webkit-tap-highlight-color: transparent;
+          border-radius: 0 !important;
         }
-        .navbar-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        .navbar-overlay {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          box-shadow: none !important;
+        }
       `}</style>
     </header>
   );
