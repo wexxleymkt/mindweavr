@@ -67,7 +67,7 @@ export function Navbar() {
   };
 
   return (
-    <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }}>
+    <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }} className={`landing-navbar${scrolled ? ' scrolled' : ''}`}>
       <div style={{
         margin: scrolled ? '0' : '20px auto',
         maxWidth: scrolled ? '100%' : 1100,
@@ -149,7 +149,12 @@ export function Navbar() {
         )}
       </AnimatePresence>
       <style>{`
-        @media (max-width: 760px) { .nav-links { display: none !important; } .mobile-btn { display: flex !important; } }
+        @media (max-width: 760px) {
+          .nav-links { display: none !important; }
+          .mobile-btn { display: flex !important; }
+          .landing-navbar > div { margin: 12px 16px !important; padding: 0 16px !important; max-width: none !important; border-radius: 100px !important; }
+          .landing-navbar.scrolled > div { margin: 0 !important; padding: 0 16px !important; border-radius: 0 !important; }
+        }
       `}</style>
     </header>
   );

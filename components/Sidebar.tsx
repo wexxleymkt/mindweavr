@@ -21,6 +21,8 @@ interface Props {
   onDelete: (id: string) => void;
   isOpen: boolean;
   onClose: () => void;
+  /** Se false, exibir "Sem plano" em vez do plano do perfil */
+  hasActivePlan?: boolean | null;
 }
 
 function formatDate(dateStr: string): string {
@@ -70,7 +72,7 @@ function getMapIcon(title: string, prompt: string): React.ElementType {
   return FileText;
 }
 
-export function Sidebar({ generations, onSelect, onDelete, isOpen, onClose }: Props) {
+export function Sidebar({ generations, onSelect, onDelete, isOpen, onClose, hasActivePlan }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -171,7 +173,7 @@ export function Sidebar({ generations, onSelect, onDelete, isOpen, onClose }: Pr
               <div style={{ margin: '12px 12px 0', padding: '10px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--color-border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text)' }}>
-                    {PLAN_LABELS[profile.plan] ?? 'Plano Essencial'}
+                    {hasActivePlan === false ? 'Sem plano' : (PLAN_LABELS[profile.plan] ?? 'Plano Essencial')}
                   </div>
                   <div style={{ fontSize: 10, color: isPro ? 'rgba(255,255,255,0.5)' : 'var(--color-muted)', fontWeight: 400 }}>
                     {isPro ? 'Mapas ilimitados' : `${mapsLeft} de ${mapsLimit} mapas`}

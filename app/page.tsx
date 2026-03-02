@@ -398,7 +398,7 @@ function HeroAnimatedVerb() {
 function HeroSection() {
   const { user } = useAuth();
   return (
-    <section id="hero" style={{ paddingTop: 130, paddingBottom: 100, paddingLeft: 24, paddingRight: 24, textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+    <section id="hero" className="landing-hero" style={{ paddingTop: 130, paddingBottom: 100, paddingLeft: 24, paddingRight: 24, textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: 80, left: '50%', transform: 'translateX(-50%)', width: 700, height: 300, background: 'radial-gradient(ellipse, rgba(255,255,255,0.03) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
       <div style={{ maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -426,12 +426,12 @@ function HeroSection() {
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
           style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 64 }}>
-          <Link href={user ? '/app' : '/login'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 28px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 0 30px rgba(255,255,255,0.1)', transition: 'all 0.2s', fontFamily: fs }}
+          <Link href={user ? '/app' : '/login'} className="landing-cta-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 28px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 0 30px rgba(255,255,255,0.1)', transition: 'all 0.2s', fontFamily: fs }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}>
             {user ? 'Abrir meu painel' : 'Começar agora'} <ArrowRight size={15} />
           </Link>
-          <a href="#how" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 24px', borderRadius: 100, border: `1px solid ${C.border}`, color: C.muted, fontSize: 14, fontWeight: 300, textDecoration: 'none', transition: 'all 0.2s', fontFamily: fs }}
+          <a href="#how" className="landing-cta-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 24px', borderRadius: 100, border: `1px solid ${C.border}`, color: C.muted, fontSize: 14, fontWeight: 300, textDecoration: 'none', transition: 'all 0.2s', fontFamily: fs }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = C.borderL; e.currentTarget.style.color = C.text; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}>
             Como funciona <ChevronRight size={14} />
@@ -440,7 +440,7 @@ function HeroSection() {
       </div>
 
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ maxWidth: 1020, margin: '0 auto', paddingBottom: 0 }}>
+        className="landing-dashboard-wrap" style={{ maxWidth: 1020, margin: '0 auto', paddingBottom: 0 }}>
         <AppMockup />
       </motion.div>
     </section>
@@ -1579,9 +1579,9 @@ function WhyDifferent() {
           </div>
         </FadeIn>
         <FadeIn delay={0.1}>
-          <div style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          <div className="why-different-table-wrap" style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
             {/* Header */}
-            <div style={{ display: 'grid', gridTemplateColumns: `1.8fr repeat(${competitors.length + 1}, 1fr)`, padding: '14px 20px', borderBottom: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.02)', overflowX: 'auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `1.8fr repeat(${competitors.length + 1}, minmax(48px, 1fr))`, padding: '14px 20px', borderBottom: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.02)', overflowX: 'auto', minWidth: 0 }} className="why-different-grid">
               <span style={{ fontSize: 11, color: C.faint, fontFamily: fs }}>Funcionalidade</span>
               <div style={{ textAlign: 'center' }}>
                 <span style={{ fontSize: 11, fontWeight: 600, color: C.text, fontFamily: fs, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -1595,10 +1595,10 @@ function WhyDifferent() {
               ))}
             </div>
             {rows.map((row, i) => (
-              <div key={i} style={{
-                display: 'grid', gridTemplateColumns: `1.8fr repeat(${competitors.length + 1}, 1fr)`,
+              <div key={i} className="why-different-grid" style={{
+                display: 'grid', gridTemplateColumns: `1.8fr repeat(${competitors.length + 1}, minmax(48px, 1fr))`,
                 padding: '11px 20px', borderBottom: i < rows.length - 1 ? `1px solid rgba(255,255,255,0.04)` : 'none',
-                transition: 'background 0.15s',
+                transition: 'background 0.15s', minWidth: 0,
               }}
                 onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.015)'}
                 onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'transparent'}>
@@ -1792,10 +1792,10 @@ function PricingSection() {
 function CTASection() {
   const { user } = useAuth();
   return (
-    <section style={{ padding: '120px 24px', background: C.bg2 }}>
+    <section className="landing-cta-section" style={{ padding: '120px 24px', background: C.bg2 }}>
       <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
         <FadeIn>
-          <div style={{ padding: '64px 48px', background: C.card, border: `1px solid ${C.borderL}`, borderRadius: 28, position: 'relative', overflow: 'hidden' }}>
+          <div className="landing-cta-inner" style={{ padding: '64px 48px', background: C.card, border: `1px solid ${C.borderL}`, borderRadius: 28, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 400, height: 400, background: 'radial-gradient(circle, rgba(255,255,255,0.025) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <h2 style={{ fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 500, letterSpacing: '-0.035em', color: C.text, lineHeight: 1.15, marginBottom: 16, fontFamily: fs }}>
               Sua audiência merece
@@ -1864,6 +1864,18 @@ export default function LandingPage() {
         data-utmify-prevent-subids
       />
       <Navbar />
+      <style>{`
+        @media (max-width: 768px) {
+          .landing-hero { padding-top: 100px !important; padding-left: 16px !important; padding-right: 16px !important; padding-bottom: 60px !important; }
+          .landing-cta-btn { padding: 16px 28px !important; font-size: 15px !important; min-height: 52px; min-width: 160px; }
+          .landing-dashboard-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 16px; }
+          .landing-dashboard-wrap > div { min-width: 320px; }
+          .why-different-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+          .why-different-grid { min-width: 560px; }
+          .landing-cta-section { padding: 80px 16px !important; }
+          .landing-cta-inner { padding: 40px 24px !important; }
+        }
+      `}</style>
       <HeroSection />
       <PainSection />
       <HowSection />

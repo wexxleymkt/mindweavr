@@ -19,7 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SocialIconsProvider } from '@/contexts/SocialIconsContext';
 
 export default function AppPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const planLevel = (profile?.plan ?? 'essencial') as 'essencial' | 'creator' | 'pro';
   const [hasActivePlan, setHasActivePlan] = useState<boolean | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -472,21 +472,40 @@ export default function AppPage() {
             <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text)', wordBreak: 'break-all', marginBottom: 24 }}>
               {user?.email}
             </p>
-            <a
-              href="/#pricing"
-              style={{
-                display: 'inline-block',
-                padding: '12px 24px',
-                borderRadius: 12,
-                background: 'var(--color-text)',
-                color: 'var(--color-bg)',
-                fontSize: 13,
-                fontWeight: 500,
-                textDecoration: 'none',
-              }}
-            >
-              Ver planos
-            </a>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'stretch' }}>
+              <a
+                href="/#pricing"
+                style={{
+                  display: 'inline-block',
+                  padding: '12px 24px',
+                  borderRadius: 12,
+                  background: 'var(--color-text)',
+                  color: 'var(--color-bg)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  textAlign: 'center',
+                }}
+              >
+                Ver planos
+              </a>
+              <button
+                type="button"
+                onClick={async () => { await signOut(); window.location.href = '/'; }}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 12,
+                  border: '1px solid var(--color-border)',
+                  background: 'transparent',
+                  color: 'var(--color-muted)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Sair da conta
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -500,6 +519,7 @@ export default function AppPage() {
         onDelete={handleDeleteGeneration}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        hasActivePlan={hasActivePlan}
       />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
@@ -510,6 +530,7 @@ export default function AppPage() {
           onNewMap={hasMap ? handleNewMap : undefined}
           onSaveMap={hasMap ? handleSaveMap : undefined}
           isSaving={isSaving}
+          hasActivePlan={hasActivePlan}
           canShare={hasMap ? (planLevel === 'creator' || planLevel === 'pro') : undefined}
           isPublic={isPublic}
           shareToken={shareToken}

@@ -350,11 +350,23 @@ export default function ParceirosPage() {
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily: fs, overflowX: 'hidden' }}>
+    <div className="parceiros-page" style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily: fs, overflowX: 'hidden' }}>
       <Navbar />
+      <style>{`
+        @media (max-width: 768px) {
+          .parceiros-page section { padding-left: 16px !important; padding-right: 16px !important; }
+          .parceiros-page .parceiros-hero { padding: 80px 16px 60px !important; min-height: auto !important; }
+          .calc-3col { grid-template-columns: 1fr !important; gap: 20px !important; }
+          .funnel-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .community-grid { grid-template-columns: 1fr !important; }
+          .community-grid > div:first-child { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; padding: 32px 24px !important; }
+          .parceiros-page .scale-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+          .parceiros-page .scale-table-wrap > div { min-width: 420px; }
+        }
+      `}</style>
 
       {/* ══ HERO ══ */}
-      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <section className="parceiros-hero" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 60, left: '50%', transform: 'translateX(-50%)', width: 800, height: 400, background: 'radial-gradient(ellipse, rgba(255,255,255,0.025) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
@@ -484,7 +496,7 @@ export default function ParceirosPage() {
 
           {/* Scale table */}
           <FadeIn delay={0.1}>
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${C.border}`, borderRadius: 18, overflow: 'hidden' }}>
+            <div className="scale-table-wrap" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${C.border}`, borderRadius: 18, overflow: 'hidden' }}>
               <div style={{ padding: '16px 28px', borderBottom: `1px solid ${C.border}`, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 {['Views qualificadas / mês', 'Clientes recorrentes', 'Ganho mensal (Creator)'].map((h, i) => (
                   <div key={i} style={{ fontSize: 10, color: C.faint, fontFamily: fs, textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: i > 0 ? 'center' : 'left' }}>{h}</div>

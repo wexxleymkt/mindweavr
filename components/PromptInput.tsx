@@ -170,7 +170,7 @@ export function PromptInput({ onGenerate, isLoading, onCreateBlank }: Props) {
   const canSubmit = (!!prompt.trim() || !!attachment) && !isLoading;
 
   return (
-    <div style={{ width: '100%', maxWidth: 650, margin: '0 auto', minWidth: 0, padding: '0 10px', boxSizing: 'border-box' }}>
+    <div className="prompt-input-root" style={{ width: '100%', maxWidth: 650, margin: '0 auto', minWidth: 0, padding: '0 10px', boxSizing: 'border-box' }}>
       {/* Card do gerador */}
       <div style={{
         borderRadius: 'var(--radius)',
@@ -205,6 +205,7 @@ export function PromptInput({ onGenerate, isLoading, onCreateBlank }: Props) {
           {!prompt.trim() && !isFocused && (
             <div
               aria-hidden
+              className="prompt-placeholder-overlay"
               style={{
                 position: 'absolute', left: 16, top: 20, right: 16, bottom: 18,
                 pointerEvents: 'none', color: 'var(--color-muted)', fontSize: 15,
@@ -538,6 +539,13 @@ export function PromptInput({ onGenerate, isLoading, onCreateBlank }: Props) {
           ))}
         </div>
       </div>
+      <style>{`
+        @media (max-width: 768px) {
+          .prompt-input-root textarea { min-height: 2.6em !important; max-height: 5.2em !important; }
+          .prompt-input-root .prompt-placeholder-overlay { -webkit-line-clamp: 2; line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; max-height: 3.9em; }
+          .prompt-input-root button[title="Gerar Mapa"], .prompt-input-root a, .prompt-input-root [title="Criar do Zero"] { min-height: 44px; padding: 12px 18px !important; }
+        }
+      `}</style>
     </div>
   );
 }

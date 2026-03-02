@@ -15,6 +15,8 @@ interface Props {
   onNewMap?: () => void;
   onSaveMap?: () => void;
   isSaving?: boolean;
+  /** Se false, usuário não tem assinatura ativa — exibir "Sem plano" em vez do plano do perfil */
+  hasActivePlan?: boolean | null;
   // Compartilhamento
   canShare?: boolean;
   isPublic?: boolean;
@@ -28,7 +30,7 @@ const PLAN_LABELS: Record<string, string> = {
   pro:       'Pro',
 };
 
-export function Header({ onToggleSidebar, mapTitle, mapPrompt, onNewMap, onSaveMap, isSaving, canShare, isPublic, shareToken, onToggleShare }: Props) {
+export function Header({ onToggleSidebar, mapTitle, mapPrompt, onNewMap, onSaveMap, isSaving, hasActivePlan, canShare, isPublic, shareToken, onToggleShare }: Props) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -100,7 +102,9 @@ export function Header({ onToggleSidebar, mapTitle, mapPrompt, onNewMap, onSaveM
     window.location.href = '/';
   };
 
-  const planLabel = profile ? (PLAN_LABELS[profile.plan] ?? 'Essencial') : null;
+  const planLabel = profile
+    ? (hasActivePlan === false ? 'Sem plano' : (PLAN_LABELS[profile.plan] ?? 'Essencial'))
+    : null;
   const initials = profile?.full_name
     ? profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : user?.email?.slice(0, 2).toUpperCase() ?? '??';
