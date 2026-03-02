@@ -80,7 +80,7 @@ export function Navbar() {
   };
 
   return (
-    <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }} className={`landing-navbar${scrolled ? ' scrolled' : ''}`}>
+    <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }} className={`landing-navbar${scrolled ? ' scrolled' : ''}${menuOpen ? ' menu-open' : ''}`}>
       <div style={{
         margin: scrolled ? '0' : '20px auto',
         maxWidth: scrolled ? '100%' : 1100,
@@ -173,70 +173,80 @@ export function Navbar() {
               }}
             />
             <motion.div
+              className="navbar-mobile-menu"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="navbar-mobile-menu"
               style={{
                 position: 'fixed',
                 top: 56,
                 left: 0,
                 right: 0,
                 zIndex: 101,
-                background: C.bg,
-                borderTop: `1px solid ${C.border}`,
-                borderLeft: `1px solid ${C.border}`,
-                borderRight: `1px solid ${C.border}`,
-                boxShadow: 'none',
-                borderRadius: 0,
-                padding: '12px 0 20px',
-                display: 'flex',
-                flexDirection: 'column',
                 maxHeight: 'calc(100vh - 56px)',
                 overflowY: 'auto',
                 overflowX: 'hidden',
               }}
             >
-              {links.map(l => (
-                <a
-                  key={l.label}
-                  href={l.href}
-                  onClick={e => { handleAnchorClick(e, l.href); closeMenu(); }}
-                  style={{
-                    fontSize: 15,
-                    color: C.text,
-                    textDecoration: 'none',
-                    fontFamily: fs,
-                    padding: '14px 20px',
-                    borderBottom: `1px solid ${C.border}`,
-                    background: 'transparent',
-                    transition: 'background 0.15s',
-                  }}
-                  onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
-                  onTouchEnd={e => (e.currentTarget.style.background = 'transparent')}
-                >
-                  {l.label}
-                </a>
-              ))}
-              <a
-                href="/#pricing"
-                onClick={e => { handleAnchorClick(e, '/#pricing'); closeMenu(); }}
+              <div
+                className="navbar-mobile-menu-inner"
                 style={{
-                  display: 'block',
-                  margin: '16px 20px 0',
-                  padding: '14px 16px',
-                  background: C.text,
-                  color: C.bg,
-                  fontSize: 15,
-                  fontWeight: 500,
-                  textDecoration: 'none',
-                  textAlign: 'center',
-                  fontFamily: fs,
+                  background: C.bg,
+                  borderTop: `1px solid ${C.border}`,
+                  borderLeft: `1px solid ${C.border}`,
+                  borderRight: `1px solid ${C.border}`,
+                  borderBottom: `1px solid ${C.border}`,
+                  padding: '12px 0 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 0,
+                  boxShadow: 'none',
+                  WebkitBoxShadow: 'none',
                 }}
               >
-                Começar agora →
-              </a>
+                {links.map(l => (
+                  <a
+                    key={l.label}
+                    href={l.href}
+                    onClick={e => { handleAnchorClick(e, l.href); closeMenu(); }}
+                    className="navbar-mobile-link"
+                    style={{
+                      fontSize: 15,
+                      color: C.text,
+                      textDecoration: 'none',
+                      fontFamily: fs,
+                      padding: '14px 20px',
+                      borderBottom: `1px solid ${C.border}`,
+                      background: 'transparent',
+                      transition: 'background 0.15s',
+                    }}
+                    onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+                    onTouchEnd={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    {l.label}
+                  </a>
+                ))}
+                <a
+                  href="/#pricing"
+                  onClick={e => { handleAnchorClick(e, '/#pricing'); closeMenu(); }}
+                  className="navbar-mobile-cta"
+                  style={{
+                    display: 'block',
+                    margin: '16px 20px 0',
+                    padding: '14px 16px',
+                    background: C.text,
+                    color: C.bg,
+                    fontSize: 15,
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    fontFamily: fs,
+                  }}
+                >
+                  Começar agora →
+                </a>
+              </div>
             </motion.div>
           </>
         )}
@@ -256,19 +266,28 @@ export function Navbar() {
             padding: 0 16px !important;
             border-radius: 0 !important;
           }
+          .landing-navbar.menu-open > div {
+            border-radius: 0 !important;
+          }
         }
         @media (min-width: 761px) {
           .navbar-overlay, .navbar-mobile-menu { display: none !important; }
         }
-        .navbar-mobile-menu,
-        .navbar-mobile-menu * {
+        .navbar-mobile-menu-inner,
+        .navbar-mobile-menu-inner *,
+        .navbar-mobile-link,
+        .navbar-mobile-cta {
           border-radius: 0 !important;
+          -webkit-border-radius: 0 !important;
           box-shadow: none !important;
+          -webkit-box-shadow: none !important;
+          -moz-box-shadow: none !important;
           outline: none !important;
         }
-        .navbar-mobile-menu {
+        .navbar-mobile-menu-inner {
           -webkit-tap-highlight-color: transparent;
-          border-radius: 0 !important;
+          box-shadow: none !important;
+          -webkit-box-shadow: none !important;
         }
         .navbar-overlay {
           backdrop-filter: none !important;
