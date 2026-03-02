@@ -355,7 +355,27 @@ export default function ParceirosPage() {
       <style>{`
         @media (max-width: 768px) {
           .parceiros-page section { padding-left: 16px !important; padding-right: 16px !important; }
-          .parceiros-page .parceiros-hero { padding: 80px 16px 60px !important; min-height: auto !important; }
+          .parceiros-page .parceiros-hero {
+            padding: 88px 16px 48px !important;
+            min-height: auto !important;
+            justify-content: flex-start !important;
+            align-items: stretch !important;
+          }
+          .parceiros-page .parceiros-hero-inner {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 4px !important;
+            box-sizing: border-box !important;
+          }
+          .parceiros-page .parceiros-hero h1 {
+            font-size: clamp(28px, 8vw, 40px) !important;
+            line-height: 1.15 !important;
+            margin-bottom: 16px !important;
+          }
+          .parceiros-page .parceiros-hero h1 span { white-space: normal !important; }
+          .parceiros-page .parceiros-hero p { font-size: 15px !important; margin-bottom: 28px !important; }
+          .parceiros-page .parceiros-hero .parceiros-hero-btns { flex-direction: column !important; gap: 10px !important; margin-bottom: 32px !important; }
+          .parceiros-page .parceiros-hero .parceiros-hero-btns a { width: 100% !important; justify-content: center !important; padding: 14px 20px !important; box-sizing: border-box !important; }
           .calc-3col { grid-template-columns: 1fr !important; gap: 20px !important; }
           .funnel-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .community-grid { grid-template-columns: 1fr !important; }
@@ -368,7 +388,7 @@ export default function ParceirosPage() {
       {/* ══ HERO ══ */}
       <section className="parceiros-hero" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 60, left: '50%', transform: 'translateX(-50%)', width: 800, height: 400, background: 'radial-gradient(ellipse, rgba(255,255,255,0.025) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div className="parceiros-hero-inner" style={{ maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1, width: '100%' }}>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <SectionBadge>
@@ -398,6 +418,7 @@ export default function ParceirosPage() {
 
           <motion.div
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
+            className="parceiros-hero-btns"
             style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
             <Link href="/login"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 0 30px rgba(255,255,255,0.1)', fontFamily: fs }}>

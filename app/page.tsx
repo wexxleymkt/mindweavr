@@ -1567,12 +1567,12 @@ function WhyDifferent() {
     { feat: 'Conexões bezier personalizadas', vals: [true, true, '⚠', false, false, false] },
   ];
   return (
-    <section style={{ padding: '120px 24px', background: C.bg2 }}>
+    <section className="why-different-section" style={{ padding: '120px 24px', background: C.bg2 }}>
       <div style={{ maxWidth: 960, margin: '0 auto' }}>
         <FadeIn>
           <div style={{ textAlign: 'center', marginBottom: 52 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, fontSize: 11, color: C.muted, marginBottom: 20, fontFamily: fs }}>Por que somos diferentes</div>
-            <h2 style={{ fontSize: 'clamp(26px, 3.5vw, 44px)', fontWeight: 500, letterSpacing: '-0.03em', color: C.text, lineHeight: 1.15, marginBottom: 14, fontFamily: fs }}>
+            <h2 style={{ fontSize: 'clamp(26px, 3.5vw, 44px)', fontWeight: 500, letterSpacing: '-0.03em', color: C.text, lineHeight: 1.2, marginBottom: 14, fontFamily: fs }}>
               A única ferramenta feita
               <br /><em style={{ fontFamily: fp, fontStyle: 'italic', fontWeight: 400, opacity: 0.5 }}>para o seu tipo de conteúdo</em>
             </h2>
@@ -1580,25 +1580,25 @@ function WhyDifferent() {
         </FadeIn>
         <FadeIn delay={0.1}>
           <div className="why-different-table-wrap" style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
-            {/* Header */}
-            <div style={{ display: 'grid', gridTemplateColumns: `1.8fr repeat(${competitors.length + 1}, minmax(48px, 1fr))`, padding: '14px 20px', borderBottom: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.02)', overflowX: 'auto', minWidth: 0 }} className="why-different-grid">
-              <span style={{ fontSize: 11, color: C.faint, fontFamily: fs }}>Funcionalidade</span>
-              <div style={{ textAlign: 'center' }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: C.text, fontFamily: fs, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            {/* Header — colunas com min-width para evitar sobreposição no mobile */}
+            <div style={{ display: 'grid', gridTemplateColumns: `minmax(160px, 1.8fr) minmax(80px, 1fr) repeat(${competitors.length}, minmax(64px, 1fr))`, padding: '14px 20px', borderBottom: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.02)' }} className="why-different-grid">
+              <span style={{ fontSize: 11, color: C.faint, fontFamily: fs, wordBreak: 'break-word' }}>Funcionalidade</span>
+              <div style={{ textAlign: 'center', minWidth: 0 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: C.text, fontFamily: fs, display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                   <Sparkles size={10} color={C.muted} /> MindWeavr
                 </span>
               </div>
               {competitors.map(comp => (
-                <div key={comp} style={{ textAlign: 'center' }}>
-                  <span style={{ fontSize: 10, color: C.faint, fontFamily: fs }}>{comp}</span>
+                <div key={comp} style={{ textAlign: 'center', minWidth: 0 }}>
+                  <span style={{ fontSize: 10, color: C.faint, fontFamily: fs, whiteSpace: 'nowrap' }}>{comp}</span>
                 </div>
               ))}
             </div>
             {rows.map((row, i) => (
               <div key={i} className="why-different-grid" style={{
-                display: 'grid', gridTemplateColumns: `1.8fr repeat(${competitors.length + 1}, minmax(48px, 1fr))`,
+                display: 'grid', gridTemplateColumns: `minmax(160px, 1.8fr) minmax(80px, 1fr) repeat(${competitors.length}, minmax(64px, 1fr))`,
                 padding: '11px 20px', borderBottom: i < rows.length - 1 ? `1px solid rgba(255,255,255,0.04)` : 'none',
-                transition: 'background 0.15s', minWidth: 0,
+                transition: 'background 0.15s',
               }}
                 onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.015)'}
                 onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'transparent'}>
@@ -1870,8 +1870,9 @@ export default function LandingPage() {
           .landing-cta-btn { padding: 16px 28px !important; font-size: 15px !important; min-height: 52px; min-width: 160px; }
           .landing-dashboard-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 16px; }
           .landing-dashboard-wrap > div { min-width: 320px; }
-          .why-different-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-          .why-different-grid { min-width: 560px; }
+          .why-different-section { padding: 80px 16px !important; }
+          .why-different-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+          .why-different-table-wrap > * { min-width: 720px; }
           .landing-cta-section { padding: 80px 16px !important; }
           .landing-cta-inner { padding: 40px 24px !important; }
         }

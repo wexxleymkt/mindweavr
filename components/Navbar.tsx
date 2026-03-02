@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Menu } from 'lucide-react';
+import { ArrowRight, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,6 +35,19 @@ export function Navbar() {
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
   }, []);
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onEsc = (e: KeyboardEvent) => e.key === 'Escape' && closeMenu();
+    document.addEventListener('keydown', onEsc);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onEsc);
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen, closeMenu]);
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     const isAnchor = href.startsWith('/#');
@@ -127,33 +140,115 @@ export function Navbar() {
           )}
         </div>
 
-        <button onClick={() => setMenuOpen(o => !o)} className="mobile-btn"
-          style={{ display: 'none', background: 'none', border: `1px solid ${C.border}`, color: C.muted, cursor: 'pointer', borderRadius: 100, padding: 8 }}>
-          <Menu size={16} />
+        <button
+          type="button"
+          aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+          onClick={() => setMenuOpen(o => !o)}
+          className="mobile-btn"
+          style={{ display: 'none', background: 'none', border: `1px solid ${C.border}`, color: C.muted, cursor: 'pointer', borderRadius: 100, padding: 10 }}>
+          {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
       </div>
 
       <AnimatePresence>
         {menuOpen && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            style={{ background: 'rgba(17,17,17,0.97)', backdropFilter: 'blur(24px)', borderBottom: `1px solid ${C.border}`, padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {links.map(l => (
-              <a key={l.label} href={l.href} onClick={e => handleAnchorClick(e, l.href)}
-                style={{ fontSize: 15, color: C.muted, textDecoration: 'none', fontFamily: fs }}>{l.label}</a>
-            ))}
-            <Link href="/login" onClick={() => setMenuOpen(false)}
-              style={{ padding: '12px 20px', background: C.text, color: C.bg, borderRadius: 12, fontSize: 14, fontWeight: 500, textDecoration: 'none', textAlign: 'center', fontFamily: fs }}>
-              Começar agora →
-            </Link>
-          </motion.div>
+          <>
+            <motion.div
+              role="presentation"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={closeMenu}
+              className="navbar-overlay"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(4px)',
+                zIndex: 99,
+              }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="navbar-mobile-menu"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 101,
+                background: 'rgba(17,17,17,0.98)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                borderBottom: `1px solid ${C.border}`,
+                padding: '72px 20px 24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                maxHeight: 'calc(100vh - 72px)',
+                overflowY: 'auto',
+              }}
+            >
+              {links.map(l => (
+                <a
+                  key={l.label}
+                  href={l.href}
+                  onClick={e => { handleAnchorClick(e, l.href); closeMenu(); }}
+                  style={{
+                    fontSize: 16,
+                    color: C.muted,
+                    textDecoration: 'none',
+                    fontFamily: fs,
+                    padding: '14px 12px',
+                    borderRadius: 12,
+                    transition: 'background 0.2s, color 0.2s',
+                  }}
+                  onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+                  onTouchEnd={e => (e.currentTarget.style.background = '')}
+                >
+                  {l.label}
+                </a>
+              ))}
+              <div style={{ height: 8 }} />
+              <Link
+                href="/login"
+                onClick={closeMenu}
+                style={{
+                  padding: '14px 20px',
+                  background: C.text,
+                  color: C.bg,
+                  borderRadius: 12,
+                  fontSize: 15,
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  textAlign: 'center',
+                  fontFamily: fs,
+                  marginTop: 4,
+                }}
+              >
+                Começar agora →
+              </Link>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
       <style>{`
         @media (max-width: 760px) {
           .nav-links { display: none !important; }
-          .mobile-btn { display: flex !important; }
+          .mobile-btn { display: flex !important; align-items: center; justify-content: center; }
           .landing-navbar > div { margin: 12px 16px !important; padding: 0 16px !important; max-width: none !important; border-radius: 100px !important; }
           .landing-navbar.scrolled > div { margin: 0 !important; padding: 0 16px !important; border-radius: 0 !important; }
+        }
+        @media (min-width: 761px) {
+          .navbar-overlay, .navbar-mobile-menu { display: none !important; }
         }
       `}</style>
     </header>
