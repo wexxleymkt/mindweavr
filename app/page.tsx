@@ -1749,11 +1749,11 @@ function PricingSection() {
                   </div>
                 </div>
 
-                {/* CTA — goes to PerfectPay checkout if not logged in, or directly to app */}
+                {/* CTA — sempre abre checkout Perfect Pay (usuário logado pode precisar assinar/renovar) */}
                 <a
-                  href={user ? '/app' : plan.checkoutUrl}
-                  target={user ? undefined : '_blank'}
-                  rel={user ? undefined : 'noopener noreferrer'}
+                  href={plan.checkoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{ display: 'block', width: '100%', padding: '12px 20px', borderRadius: 100, textAlign: 'center', textDecoration: 'none', fontSize: 13, fontWeight: 500, marginBottom: 24, background: plan.popular ? C.text : 'transparent', border: `1px solid ${plan.popular ? 'transparent' : C.borderL}`, color: plan.popular ? C.bg : C.muted, transition: 'all 0.2s', fontFamily: fs, boxSizing: 'border-box' }}
                   onMouseEnter={e => { if (plan.popular) { (e.currentTarget as HTMLAnchorElement).style.opacity = '0.85'; } else { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLAnchorElement).style.color = C.text; } }}
                   onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = '1'; if (!plan.popular) { (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'; (e.currentTarget as HTMLAnchorElement).style.color = C.muted; } }}>

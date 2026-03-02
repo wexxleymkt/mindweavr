@@ -13,6 +13,7 @@ import { generateMindMap, generateNodeExpansion, generateCardNode } from '@/lib/
 import { getEmptyCardPlaceholder } from '@/lib/cardPreview';
 import { saveGeneration, getGenerations, toggleShareMap } from '@/lib/supabase';
 import { MapData, MapGeneration, LayoutMode, ConnectionStyle, MapNode, VisualType } from '@/lib/types';
+import { Lock } from 'lucide-react';
 import type { AttachedFile } from '@/components/PromptInput';
 import { useAuth } from '@/contexts/AuthContext';
 import { SocialIconsProvider } from '@/contexts/SocialIconsContext';
@@ -457,6 +458,11 @@ export default function AppPage() {
               textAlign: 'center',
             }}
           >
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Lock size={22} color="var(--color-muted)" strokeWidth={1.8} />
+              </div>
+            </div>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text)', marginBottom: 12 }}>
               Você não tem um plano ativo
             </div>
