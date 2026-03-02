@@ -158,7 +158,7 @@ export function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.15 }}
               onClick={closeMenu}
               className="navbar-overlay"
               style={{
@@ -168,29 +168,26 @@ export function Navbar() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(4px)',
+                background: 'rgba(0,0,0,0.5)',
                 zIndex: 99,
               }}
             />
             <motion.div
-              initial={{ opacity: 0, y: -12 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
               className="navbar-mobile-menu"
               style={{
                 position: 'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
+                width: '100%',
                 zIndex: 101,
-                background: 'rgba(17,17,17,0.98)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
+                background: C.bg2,
                 borderBottom: `1px solid ${C.border}`,
-                borderRadius: 0,
-                padding: '72px 16px 20px',
+                padding: '72px 0 20px',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 0,
@@ -208,10 +205,9 @@ export function Navbar() {
                     color: C.text,
                     textDecoration: 'none',
                     fontFamily: fs,
-                    padding: '14px 12px',
-                    borderRadius: 0,
+                    padding: '14px 20px',
                     borderBottom: `1px solid ${C.border}`,
-                    transition: 'background 0.2s',
+                    transition: 'background 0.15s',
                   }}
                   onTouchStart={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
                   onTouchEnd={e => (e.currentTarget.style.background = '')}
@@ -219,24 +215,26 @@ export function Navbar() {
                   {l.label}
                 </a>
               ))}
-              <div style={{ height: 16 }} />
-              <Link
-                href="/login"
-                onClick={closeMenu}
-                style={{
-                  padding: '14px 20px',
-                  background: C.text,
-                  color: C.bg,
-                  borderRadius: 6,
-                  fontSize: 15,
-                  fontWeight: 500,
-                  textDecoration: 'none',
-                  textAlign: 'center',
-                  fontFamily: fs,
-                }}
-              >
-                Começar agora →
-              </Link>
+              <div style={{ padding: '16px 20px 0' }}>
+                <a
+                  href="/#pricing"
+                  onClick={e => { handleAnchorClick(e, '/#pricing'); closeMenu(); }}
+                  style={{
+                    display: 'block',
+                    padding: '14px 20px',
+                    background: C.text,
+                    color: C.bg,
+                    borderRadius: 6,
+                    fontSize: 15,
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    fontFamily: fs,
+                  }}
+                >
+                  Começar agora →
+                </a>
+              </div>
             </motion.div>
           </>
         )}
@@ -251,7 +249,13 @@ export function Navbar() {
         @media (min-width: 761px) {
           .navbar-overlay, .navbar-mobile-menu { display: none !important; }
         }
-        .navbar-mobile-menu { border-radius: 0 !important; box-shadow: none !important; }
+        .navbar-mobile-menu {
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          outline: none !important;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .navbar-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
       `}</style>
     </header>
   );
