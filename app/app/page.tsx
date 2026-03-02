@@ -9,7 +9,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { PromptInput } from '@/components/PromptInput';
 import MapRenderer from '@/components/MapRenderer';
 import { LoadingAnimation } from '@/components/LoadingAnimation';
-import { generateNodeExpansion, generateCardNode } from '@/lib/replicate';
+import { generateMindMap, generateNodeExpansion, generateCardNode } from '@/lib/gemini';
 import { getEmptyCardPlaceholder } from '@/lib/cardPreview';
 import { saveGeneration, getGenerations, toggleShareMap } from '@/lib/supabase';
 import { MapData, MapGeneration, LayoutMode, ConnectionStyle, MapNode, VisualType } from '@/lib/types';
@@ -76,62 +76,41 @@ export default function AppPage() {
     setError(null);
     setLoadingPrompt(prompt);
     setCurrentMap(null);
-    const GENERATE_TIMEOUT_MS = 300_000; // 5 min — Replicate pode levar ~1 min
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS);
-      const res = await fetch('/api/generate-map', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          attachment: options?.attachment
-            ? {
-                base64: options.attachment.base64,
-                mimeType: options.attachment.mimeType,
-                name: options.attachment.name,
-              }
-            : undefined,
-          options: {
-            layoutMode: options?.layoutMode,
-            addExtraTexts: options?.addExtraTexts,
-            addReferenceImages: options?.addReferenceImages,
-            addNumberedSequence: options?.addNumberedSequence,
-            planLevel,
-          },
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-      const raw = await res.text();
-      let mapData: Record<string, unknown>;
-      try {
-        mapData = JSON.parse(raw) as Record<string, unknown>;
-      } catch {
-        if (!res.ok) throw new Error(`Erro ${res.status}: resposta inválida`);
-        throw new Error('Resposta do servidor veio truncada. Tente um tema mais curto ou tente novamente.');
-      }
-      if (!res.ok) throw new Error((mapData.error as string) || `Erro ${res.status}`);
+      const mapData = await generateMindMap(
+        prompt,
+        options?.attachment,
+        {
+          addExtraTexts: options?.addExtraTexts,
+          addReferenceImages: options?.addReferenceImages,
+          addNumberedSequence: options?.addNumberedSequence,
+          planLevel,
+          layoutMode: options?.layoutMode,
+        }
+      );
       if (options?.layoutMode)      mapData.layoutMode     = options.layoutMode;
       if (options?.connectionStyle) mapData.connectionStyle = options.connectionStyle;
       setCurrentMap(mapData);
       setCurrentPrompt(prompt);
-      setIsLoading(false);
-      toast.success(mapData.title, { description: 'Mapa criado' });
-      saveGeneration(mapData.title, prompt, mapData, user?.id).then((saved) => {
-        if (saved) {
-          setCurrentMapId(saved.id);
-          setGenerations(prev => [saved, ...prev]);
-        }
-      }).catch(() => { /* salvar em segundo plano; falha não bloqueia a UI */ });
+      // Mostra o mapa na hora; salvamento no Supabase em segundo plano (não bloqueia a UI)
+      setTimeout(() => setIsLoading(false), 320);
+      saveGeneration(mapData.title, prompt, mapData, user?.id)
+        .then((saved) => {
+          if (saved) {
+            setCurrentMapId(saved.id);
+            setGenerations(prev => [saved, ...prev]);
+            toast.success(mapData.title, { description: 'Mapa criado e salvo' });
+          } else {
+            toast.success(mapData.title, { description: 'Mapa criado. Salvamento em segundo plano falhou; você pode continuar editando.' });
+          }
+        })
+        .catch(() => {
+          toast.success(mapData.title, { description: 'Mapa criado. Não foi possível salvar; você pode continuar editando.' });
+        });
     } catch (err) {
-      const msg = err instanceof Error
-        ? (err.name === 'AbortError' ? 'A geração demorou mais de 5 minutos. Tente um tema mais curto ou tente novamente.' : err.message)
-        : 'Erro desconhecido';
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido';
       setError(msg);
-      toast.error('Erro ao gerar mapa', { description: msg });
-      setIsLoading(false);
-    } finally {
+      toast.error('Erro ao gerar mapa');
       setIsLoading(false);
     }
   }, [user?.id]);

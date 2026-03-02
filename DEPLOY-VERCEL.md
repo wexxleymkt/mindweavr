@@ -34,7 +34,7 @@ Antes de dar **Deploy**, em **Environment Variables** adicione (os mesmos do seu
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://msxswthxpwhwdbhfrsef.supabase.co` | Production, Preview, Development |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *(sua anon key do Supabase)* | Production, Preview, Development |
 | `SUPABASE_SERVICE_ROLE_KEY` | *(sua service role key)* | Production, Preview, Development |
-| `REPLICATE_API_TOKEN` | *(token em replicate.com/account – Gemini 2.5 Flash)* | Production, Preview, Development |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | *(sua chave da API Gemini)* | Production, Preview, Development |
 | `PERFECTPAY_TOKEN` | *(token público Perfect Pay)* | Production, Preview, Development |
 | `NEXT_PUBLIC_APP_URL` | `https://mindweavr.app` (ou a URL que a Vercel der, ex. `https://mindweavr.vercel.app`) | Production, Preview, Development |
 

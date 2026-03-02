@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "leia para entender o deploy via github"]
+  "exclude": ["node_modules"]
 }

@@ -60,7 +60,7 @@ Conteúdo (ajuste com seus valores):
 NEXT_PUBLIC_SUPABASE_URL=https://msxswthxpwhwdbhfrsef.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_anon_key
 SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
-REPLICATE_API_TOKEN=seu_token_replicate
+NEXT_PUBLIC_GEMINI_API_KEY=sua_chave_gemini
 PERFECTPAY_TOKEN=seu_token
 NEXT_PUBLIC_APP_URL=https://mindweavr.app
 
@@ -105,14 +105,9 @@ server {
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
-        proxy_connect_timeout 300s;
-        proxy_send_timeout 300s;
-        proxy_read_timeout 300s;
     }
 }
 ```
-
-**Importante:** Os timeouts `proxy_*_timeout 300s` são necessários para a rota `/api/generate-map` (Replicate pode levar ~1 minuto). Sem isso, o Nginx pode fechar a conexão antes da resposta e a tela fica em "Criando mapa mental" sem terminar. Se o site já estiver no ar, edite o config do Nginx na VPS, adicione essas três linhas dentro do `location /` e rode `nginx -t && systemctl reload nginx`.
 
 Ative e pegue o certificado:
 

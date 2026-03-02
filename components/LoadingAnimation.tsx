@@ -179,7 +179,7 @@ export function LoadingAnimation({ prompt }: Props) {
         />
       </div>
       <p style={{ fontSize: 11, color: 'var(--color-faint)', marginTop: -8 }}>
-        Pode levar até 2–3 minutos com documentos
+        Pode levar até 1 minuto
       </p>
     </div>
   );
