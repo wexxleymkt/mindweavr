@@ -20,6 +20,7 @@ import { SocialIconsProvider } from '@/contexts/SocialIconsContext';
 export default function AppPage() {
   const { user, profile } = useAuth();
   const planLevel = (profile?.plan ?? 'essencial') as 'essencial' | 'creator' | 'pro';
+  const [hasActivePlan, setHasActivePlan] = useState<boolean | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +45,18 @@ export default function AppPage() {
       getGenerations(user.id).then(setGenerations);
     }
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.email) return;
+    fetch('/api/check-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email }),
+    })
+      .then(r => r.json())
+      .then(({ hasActive }) => setHasActivePlan(!!hasActive))
+      .catch(() => setHasActivePlan(false));
+  }, [user?.email]);
 
   const handleGenerate = useCallback(async (
     prompt: string,
@@ -415,9 +428,64 @@ export default function AppPage() {
     marginTop: '56px',
   };
 
+  const showNoPlanModal = hasActivePlan === false;
+
   return (
     <SocialIconsProvider>
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--color-bg)' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--color-bg)', position: 'relative' }}>
+      {showNoPlanModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 420,
+              width: '100%',
+              background: 'var(--color-card)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 20,
+              padding: 32,
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text)', marginBottom: 12 }}>
+              Você não tem um plano ativo
+            </div>
+            <p style={{ fontSize: 13, fontWeight: 300, color: 'var(--color-muted)', lineHeight: 1.6, marginBottom: 16 }}>
+              Para acessar a aplicação, ative um plano usando o mesmo e-mail com o qual você criou a conta:
+            </p>
+            <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text)', wordBreak: 'break-all', marginBottom: 24 }}>
+              {user?.email}
+            </p>
+            <a
+              href="/#pricing"
+              style={{
+                display: 'inline-block',
+                padding: '12px 24px',
+                borderRadius: 12,
+                background: 'var(--color-text)',
+                color: 'var(--color-bg)',
+                fontSize: 13,
+                fontWeight: 500,
+                textDecoration: 'none',
+              }}
+            >
+              Ver planos
+            </a>
+          </div>
+        </div>
+      )}
+
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--color-bg)', flex: 1, pointerEvents: showNoPlanModal ? 'none' : 'auto', opacity: showNoPlanModal ? 0.5 : 1 }}>
       <Toaster position="top-right" toastOptions={{ style: toastStyle }} />
 
       <Sidebar
@@ -555,6 +623,7 @@ export default function AppPage() {
           </AnimatePresence>
         </div>
       </div>
+    </div>
     </div>
     </SocialIconsProvider>
   );

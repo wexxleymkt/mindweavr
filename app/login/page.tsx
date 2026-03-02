@@ -24,9 +24,12 @@ export default function LoginPage() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showRecover, setShowRecover] = useState(false);
+  const [recoverSent, setRecoverSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -53,23 +56,20 @@ export default function LoginPage() {
     setSuccess(null);
     try {
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        router.push('/app');
+        if (showRecover) {
+          if (!email.trim()) throw new Error('Informe seu email para recuperar a senha.');
+          const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/login?recovered=1` });
+          if (error) throw error;
+          setRecoverSent(true);
+          setSuccess('Enviamos um link para redefinir sua senha no seu email. Verifique sua caixa de entrada.');
+        } else {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          router.push('/app');
+        }
       } else {
         if (password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres.');
-
-        // Verify active subscription before allowing signup
-        const res = await fetch('/api/check-subscription', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-        const { hasActive, plan } = await res.json();
-
-        if (!hasActive) {
-          throw new Error('Nenhum plano ativo encontrado para este email. Adquira um plano para criar sua conta.');
-        }
+        if (password !== confirmPassword) throw new Error('As senhas não coincidem. Confira e tente novamente.');
 
         const { error } = await supabase.auth.signUp({
           email,
@@ -78,12 +78,11 @@ export default function LoginPage() {
             data: {
               full_name: fullName,
               whatsapp: whatsapp.replace(/\D/g, ''),
-              plan,
             },
           },
         });
         if (error) throw error;
-        setSuccess('Conta criada! Você já pode fazer login.');
+        setSuccess('Conta criada! Confirme seu email (se necessário) e faça login.');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro desconhecido';
@@ -139,7 +138,7 @@ export default function LoginPage() {
         {/* Mode toggle */}
         <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 3, marginBottom: 24 }}>
           {(['login', 'signup'] as const).map(m => (
-            <button key={m} onClick={() => { setMode(m); setError(null); setSuccess(null); }}
+            <button key={m} onClick={() => { setMode(m); setError(null); setSuccess(null); setShowRecover(false); setRecoverSent(false); setConfirmPassword(''); }}
               style={{ flex: 1, padding: '8px 12px', borderRadius: 9, border: 'none', fontSize: 13, fontWeight: 400, cursor: 'pointer', transition: 'all 0.2s', background: mode === m ? 'rgba(255,255,255,0.08)' : 'transparent', color: mode === m ? C.text : C.faint, fontFamily: fs }}>
               {m === 'login' ? 'Entrar' : 'Criar conta'}
             </button>
@@ -177,20 +176,39 @@ export default function LoginPage() {
 
           <Field icon={<Mail size={13} />} type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
 
-          <div style={{ position: 'relative' }}>
-            <Field
-              icon={<Lock size={13} />}
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Senha"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
-            <button type="button" onClick={() => setShowPassword(s => !s)}
-              style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.faint, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}>
-              {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
-            </button>
-          </div>
+          {mode === 'login' && showRecover ? (
+            <p style={{ fontSize: 12, color: C.muted, fontFamily: fs }}>
+              Digite o email da sua conta e enviaremos um link para redefinir a senha.
+            </p>
+          ) : (
+            <>
+              <div style={{ position: 'relative' }}>
+                <Field
+                  icon={<Lock size={13} />}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Senha"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required={!showRecover}
+                />
+                <button type="button" onClick={() => setShowPassword(s => !s)}
+                  style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.faint, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}>
+                  {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                </button>
+              </div>
+
+              {mode === 'signup' && (
+                <Field
+                  icon={<Lock size={13} />}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Confirmar senha"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                />
+              )}
+            </>
+          )}
 
           <AnimatePresence>
             {error && (
@@ -207,6 +225,13 @@ export default function LoginPage() {
             )}
           </AnimatePresence>
 
+          {mode === 'login' && showRecover && (
+            <button type="button" onClick={() => { setShowRecover(false); setError(null); setSuccess(null); setRecoverSent(false); }}
+              style={{ marginTop: 4, padding: '8px 12px', border: 'none', background: 'transparent', color: C.muted, fontSize: 12, cursor: 'pointer', fontFamily: fs }}>
+              ← Voltar ao login
+            </button>
+          )}
+
           <button type="submit" disabled={loading}
             style={{ marginTop: 4, padding: '13px 20px', borderRadius: 12, border: 'none', background: loading ? 'rgba(255,255,255,0.06)' : C.text, color: loading ? C.faint : '#0a0a0a', fontSize: 14, fontWeight: 500, cursor: loading ? 'default' : 'pointer', transition: 'all 0.2s', fontFamily: fs, letterSpacing: '-0.01em' }}
             onMouseEnter={e => { if (!loading) { (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'; (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; } }}
@@ -214,11 +239,19 @@ export default function LoginPage() {
             {loading ? (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ width: 13, height: 13, border: `2px solid ${C.border}`, borderTopColor: C.muted, borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />
-                {mode === 'login' ? 'Entrando...' : 'Verificando plano...'}
+                {mode === 'login' && showRecover ? 'Enviando...' : mode === 'login' ? 'Entrando...' : 'Criando conta...'}
               </span>
-            ) : mode === 'login' ? 'Entrar' : 'Criar conta'}
+            ) : mode === 'login' && showRecover ? 'Enviar link de recuperação' : mode === 'login' ? 'Entrar' : 'Criar conta'}
           </button>
         </form>
+
+        {mode === 'login' && !showRecover && !recoverSent && (
+          <p style={{ marginTop: 10, textAlign: 'center', fontSize: 12, fontFamily: fs }}>
+            <button type="button" onClick={() => setShowRecover(true)} style={{ background: 'none', border: 'none', color: C.muted, cursor: 'pointer', textDecoration: 'underline', padding: 0, fontSize: 12 }}>
+              Esqueci minha senha
+            </button>
+          </p>
+        )}
 
         {mode === 'login' && (
           <p style={{ marginTop: 18, textAlign: 'center', fontSize: 12, color: C.faint, fontWeight: 300, fontFamily: fs }}>
@@ -230,7 +263,7 @@ export default function LoginPage() {
         )}
         {mode === 'signup' && (
           <p style={{ marginTop: 12, textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 300, lineHeight: 1.5, fontFamily: fs }}>
-            O cadastro é exclusivo para quem já possui um plano ativo.
+            Após criar a conta, ative um plano com o mesmo e-mail para acessar a aplicação.
           </p>
         )}
 
