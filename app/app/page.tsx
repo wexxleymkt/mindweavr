@@ -76,7 +76,10 @@ export default function AppPage() {
     setError(null);
     setLoadingPrompt(prompt);
     setCurrentMap(null);
+    const GENERATE_TIMEOUT_MS = 300_000; // 5 min — Replicate pode levar ~1 min
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS);
       const res = await fetch('/api/generate-map', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,7 +100,9 @@ export default function AppPage() {
             planLevel,
           },
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       const mapData = await res.json();
       if (!res.ok) throw new Error(mapData.error || `Erro ${res.status}`);
       if (options?.layoutMode)      mapData.layoutMode     = options.layoutMode;
@@ -112,9 +117,11 @@ export default function AppPage() {
       toast.success(mapData.title, { description: 'Mapa criado e salvo' });
       setTimeout(() => setIsLoading(false), 320);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erro desconhecido';
+      const msg = err instanceof Error
+        ? (err.name === 'AbortError' ? 'A geração demorou mais de 5 minutos. Tente um tema mais curto ou tente novamente.' : err.message)
+        : 'Erro desconhecido';
       setError(msg);
-      toast.error('Erro ao gerar mapa');
+      toast.error('Erro ao gerar mapa', { description: msg });
       setIsLoading(false);
     }
   }, [user?.id]);

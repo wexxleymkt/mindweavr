@@ -33,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "pg": "^8.19.0",
+    "ssh2": "^1.17.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

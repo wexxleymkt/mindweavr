@@ -105,9 +105,14 @@ server {
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
     }
 }
 ```
+
+**Importante:** Os timeouts `proxy_*_timeout 300s` são necessários para a rota `/api/generate-map` (Replicate pode levar ~1 minuto). Sem isso, o Nginx pode fechar a conexão antes da resposta e a tela fica em "Criando mapa mental" sem terminar. Se o site já estiver no ar, edite o config do Nginx na VPS, adicione essas três linhas dentro do `location /` e rode `nginx -t && systemctl reload nginx`.
 
 Ative e pegue o certificado:
 

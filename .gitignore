@@ -35,6 +35,7 @@ yarn-error.log*
 
 # scripts com credenciais (não versionar)
 scripts/setup-vps-env.mjs
+scripts/setup-nginx-vps.mjs
 .deploy-webhook-secret
 
 # vercel
