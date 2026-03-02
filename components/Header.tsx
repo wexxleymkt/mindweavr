@@ -25,6 +25,7 @@ interface Props {
 }
 
 const PLAN_LABELS: Record<string, string> = {
+  none:      'Sem plano',
   essencial: 'Essencial',
   creator:   'Creator',
   pro:       'Pro',

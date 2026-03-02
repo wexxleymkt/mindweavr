@@ -40,6 +40,7 @@ function formatDate(dateStr: string): string {
 }
 
 const PLAN_LABELS: Record<string, string> = {
+  none:      'Sem plano',
   essencial: 'Plano Essencial',
   creator:   'Plano Creator',
   pro:       'Plano Pro',
