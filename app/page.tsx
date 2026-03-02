@@ -426,7 +426,7 @@ function HeroSection() {
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
           style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 64 }}>
-          <Link href={user ? '/app' : '/login'} className="landing-cta-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 28px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 0 30px rgba(255,255,255,0.1)', transition: 'all 0.2s', fontFamily: fs }}
+          <Link href={user ? '/app' : '/#pricing'} className="landing-cta-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 28px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 0 30px rgba(255,255,255,0.1)', transition: 'all 0.2s', fontFamily: fs }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}>
             {user ? 'Abrir meu painel' : 'Começar agora'} <ArrowRight size={15} />
@@ -1804,7 +1804,7 @@ function CTASection() {
             <p style={{ fontSize: 15, fontWeight: 300, color: C.muted, lineHeight: 1.7, maxWidth: 440, margin: '0 auto 36px', fontFamily: fs }}>
               Junte-se a centenas de criadores que já transformaram o jeito de apresentar conteúdo.
             </p>
-            <Link href={user ? '/app' : '/login'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 4px 24px rgba(255,255,255,0.1)', transition: 'all 0.2s', fontFamily: fs }}
+            <Link href={user ? '/app' : '/#pricing'} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 4px 24px rgba(255,255,255,0.1)', transition: 'all 0.2s', fontFamily: fs }}
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}>
               {user ? 'Criar meu próximo mapa' : 'Começar agora'} <ArrowRight size={15} />

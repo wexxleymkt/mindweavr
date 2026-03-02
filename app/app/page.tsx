@@ -177,31 +177,44 @@ export default function AppPage() {
     setError(null);
   };
 
+  const SAVE_TIMEOUT_MS = 20000;
+
   const handleSaveMap = useCallback(async () => {
     if (!currentMap || !user?.id || isSaving) return;
     setIsSaving(true);
     try {
       if (currentMapId) {
-        // Update existing
+        // Update existing (com user_id para RLS permitir)
         const { supabase } = await import('@/lib/supabase');
-        const { error } = await supabase
+        const updatePromise = supabase
           .from('map_generations')
           .update({ map_data: currentMap, updated_at: new Date().toISOString() })
-          .eq('id', currentMapId);
+          .eq('id', currentMapId)
+          .eq('user_id', user.id);
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), SAVE_TIMEOUT_MS)
+        );
+        const { error } = await Promise.race([updatePromise, timeoutPromise]) as { error: unknown };
         if (error) throw error;
         setGenerations(prev => prev.map(g => g.id === currentMapId ? { ...g, map_data: currentMap } : g));
         toast.success('Mapa salvo', { description: 'Suas alterações foram salvas.' });
       } else {
-        // Save as new
-        const saved = await saveGeneration(currentMap.title, currentPrompt, currentMap, user.id);
+        // Save as new (com timeout para não travar)
+        const savePromise = saveGeneration(currentMap.title, currentPrompt, currentMap, user.id);
+        const timeoutPromise = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), SAVE_TIMEOUT_MS)
+        );
+        const saved = await Promise.race([savePromise, timeoutPromise]);
         if (saved) {
           setCurrentMapId(saved.id);
           setGenerations(prev => [saved, ...prev]);
           toast.success('Mapa salvo', { description: 'Mapa adicionado ao histórico.' });
+        } else {
+          toast.error('Não foi possível salvar', { description: 'Tente novamente em instantes. Suas alterações continuam no mapa.' });
         }
       }
     } catch {
-      toast.error('Erro ao salvar mapa');
+      toast.error('Erro ao salvar mapa', { description: 'Verifique sua conexão e tente novamente.' });
     } finally {
       setIsSaving(false);
     }

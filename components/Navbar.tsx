@@ -153,7 +153,7 @@ export function Navbar() {
                   onMouseLeave={e => (e.currentTarget.style.color = C.muted)}>
                   Entrar
                 </Link>
-                <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 13, fontWeight: 500, textDecoration: 'none', fontFamily: fs }}
+                <Link href="/#pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 13, fontWeight: 500, textDecoration: 'none', fontFamily: fs }}
                   onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                   onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                   Começar agora

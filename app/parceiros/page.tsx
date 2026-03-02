@@ -341,7 +341,7 @@ export default function ParceirosPage() {
 
   const faq = [
     { q: 'Como funciona a comissão?',             a: 'Você recebe 35% do valor de cada venda realizada pelo seu link. A comissão é recorrente — continua entrando todo mês enquanto o cliente permanecer ativo.' },
-    { q: 'Quando recebo meu pagamento?',           a: 'Pagamentos mensais via PIX, até o dia 15 do mês seguinte. Saldo mínimo de R$50; valores menores acumulam automaticamente.' },
+    { q: 'Quando recebo meu pagamento?',           a: 'O pagamento segue a plataforma de vendas e suas taxas; geralmente você consegue sacar no mesmo dia. Saque mínimo: R$ 100,00.' },
     { q: 'O que é conteúdo qualificado?',          a: 'É conteúdo criado para o público certo — criadores, infoprodutores e YouTubers. Views de pessoas sem fit com o produto não geram conversão.' },
     { q: 'Preciso ser assinante para ser afiliado?', a: 'Não é obrigatório, mas recomendamos usar o produto. Quem usa e aprova converte muito mais — sua audiência percebe autenticidade.' },
     { q: 'Posso divulgar em qualquer lugar?',      a: 'Sim — redes sociais, blog, YouTube, e-mail, WhatsApp. Apenas evite spam e práticas que prejudiquem sua audiência.' },
@@ -420,10 +420,10 @@ export default function ParceirosPage() {
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
             className="parceiros-hero-btns"
             style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
-            <Link href="/login"
+            <a href="https://chat.whatsapp.com/LOA8fTwiVkXDTqxaaHAGXJ" target="_blank" rel="noopener noreferrer"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', boxShadow: '0 0 30px rgba(255,255,255,0.1)', fontFamily: fs }}>
               Tornar-me parceiro <ArrowRight size={15} />
-            </Link>
+            </a>
             <a href="#como-funciona"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 24px', borderRadius: 100, border: `1px solid ${C.border}`, color: C.muted, fontSize: 14, fontWeight: 300, textDecoration: 'none', fontFamily: fs }}>
               Como funciona <ChevronDown size={14} />
@@ -651,7 +651,7 @@ export default function ParceirosPage() {
                   <p style={{ fontSize: 15, fontWeight: 300, color: C.muted, fontFamily: fs, lineHeight: 1.7, marginBottom: 32, maxWidth: 380 }}>
                     Grupo exclusivo no WhatsApp para parceiros ativos. Tire dúvidas, compartilhe estratégias e receba novidades antes de todo mundo.
                   </p>
-                  <a href="https://chat.whatsapp.com/LINK_DO_GRUPO" target="_blank" rel="noopener noreferrer"
+                  <a href="https://chat.whatsapp.com/LOA8fTwiVkXDTqxaaHAGXJ" target="_blank" rel="noopener noreferrer"
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 14, fontWeight: 500, textDecoration: 'none', fontFamily: fs, boxShadow: '0 0 30px rgba(255,255,255,0.08)' }}>
                     <MessageCircle size={15} />
                     Entrar na comunidade
@@ -737,11 +737,11 @@ export default function ParceirosPage() {
               <br />Sem burocracia. Sem taxa de adesão.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/login"
+              <a href="https://chat.whatsapp.com/LOA8fTwiVkXDTqxaaHAGXJ" target="_blank" rel="noopener noreferrer"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 32px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 15, fontWeight: 500, textDecoration: 'none', boxShadow: '0 0 40px rgba(255,255,255,0.1)', fontFamily: fs }}>
                 Tornar-me parceiro <ArrowRight size={16} />
-              </Link>
-              <a href="https://chat.whatsapp.com/LINK_DO_GRUPO" target="_blank" rel="noopener noreferrer"
+              </a>
+              <a href="https://chat.whatsapp.com/LOA8fTwiVkXDTqxaaHAGXJ" target="_blank" rel="noopener noreferrer"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 24px', borderRadius: 100, border: `1px solid ${C.border}`, color: C.muted, fontSize: 15, fontWeight: 300, textDecoration: 'none', fontFamily: fs }}>
                 <MessageCircle size={15} />
                 Comunidade
