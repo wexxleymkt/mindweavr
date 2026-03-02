@@ -60,7 +60,7 @@ Conteúdo (ajuste com seus valores):
 NEXT_PUBLIC_SUPABASE_URL=https://msxswthxpwhwdbhfrsef.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_anon_key
 SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
-NEXT_PUBLIC_GEMINI_API_KEY=sua_chave_gemini
+REPLICATE_API_TOKEN=seu_token_replicate
 PERFECTPAY_TOKEN=seu_token
 NEXT_PUBLIC_APP_URL=https://mindweavr.app
 
@@ -81,12 +81,12 @@ pm2 startup   # segue as instruções para iniciar o PM2 no boot
 
 A app fica rodando na porta 3000. Se ainda não tiver domínio, teste com `http://IP_DA_VPS:3000`.
 
-### 2.3 Domínio e HTTPS (opcional)
+### 2.3 Domínio e HTTPS
 
 Para usar **mindweavr.app**:
 
-1. **DNS:** No painel do registrador do domínio, crie um registro **A** apontando para o IP da VPS.
-2. **Nginx + Certbot na VPS:**
+1. **DNS:** No painel do registrador do domínio, crie um registro **A** (@) apontando para o IP da VPS e, se quiser, CNAME `www` → `mindweavr.app`.
+2. **Nginx + Certbot na VPS:** Pode usar o script `scripts/setup-nginx-vps.mjs` (requer SSH configurado) ou seguir os passos manuais abaixo:
 
 ```bash
 apt update && apt install -y nginx certbot python3-certbot-nginx

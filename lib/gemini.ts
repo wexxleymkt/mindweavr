@@ -1,5 +1,3 @@
-import { MapData, MapAnnotations, MapNode, VisualType } from './types';
-
 export interface GenerateMindMapOptions {
   addExtraTexts?: boolean;
   addReferenceImages?: boolean;
@@ -10,12 +8,6 @@ export interface GenerateMindMapOptions {
   /** Layout Técnico: foco em conteúdo explicativo, com 2 cards visuais por filho */
   layoutMode?: 'top-down' | 'left-right' | 'tecnico';
 }
-
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-/** Apenas Gemini 2.5 Flash — modelos 1.5 retornam 404 (indisponíveis) na API atual. */
-const MODELS = ['gemini-2.5-flash'];
-const REQUEST_TIMEOUT_MS = 180_000; // 3 min — documentos grandes podem demorar
-const RETRY_DELAY_MS = 2500;        // espera antes de retry em 429/503
 
 const ICONS = [
   'Zap','Target','TrendingUp','TrendingDown','Users','Heart','MessageCircle',
@@ -417,7 +409,7 @@ const PREMIUM_TYPES_SECTION = `
     Campos: label, codeLang (ex: "javascript", "python", "sql"), codeLines: ["linha 1", "linha 2"] (3-8 linhas)
 `;
 
-function buildSystemPrompt(planLevel?: 'essencial' | 'creator' | 'pro'): string {
+export function buildSystemPrompt(planLevel?: 'essencial' | 'creator' | 'pro'): string {
   const hasPremium = planLevel === 'creator' || planLevel === 'pro';
   const allowedTypesLine = hasPremium
     ? `stat, chart-bar, chart-ring, timeline, comparison, highlight, list, line-chart, progress-bars, progress-ring, countdown, balance, summary, checklist, success, product-row, rating, date-pills, time-slots, feature-card, gradient-stat, icon-grid, flow-steps, testimonial, price-tag, alert-box, metric-trio, kanban-card, tag-cloud, versus-card, steps-numbered, social-stat, cta-card, score-card, heatmap, avatar-list, notification-card, insight-numbered, skill-grid, quote-hero, compare-table, cycle-flow, funnel-bars, priority-board, event-card, growth-indicator, team-card, pill-metrics, code-snippet`
@@ -434,65 +426,6 @@ function buildSystemPrompt(planLevel?: 'essencial' | 'creator' | 'pro'): string 
       /══════════════════\nREGRAS OBRIGATÓRIAS:/,
       `${premiumSection}\n\n══════════════════\nREGRAS OBRIGATÓRIAS:`
     );
-}
-
-interface Attachment { base64: string; mimeType: string; name: string; }
-
-async function callModel(model: string, prompt: string, attachment?: Attachment): Promise<string> {
-  if (!API_KEY?.trim()) {
-    throw new Error('Chave da API Gemini não configurada. Defina NEXT_PUBLIC_GEMINI_API_KEY no .env.local');
-  }
-
-  const doFetch = async (version: string): Promise<Response> => {
-    const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${API_KEY}`;
-    const parts: unknown[] = attachment
-      ? [{ inlineData: { mimeType: attachment.mimeType, data: attachment.base64 } }, { text: prompt }]
-      : [{ text: prompt }];
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts }],
-          generationConfig: { temperature: 0.65, maxOutputTokens: 16384 },
-        }),
-        signal: controller.signal,
-      });
-      return res;
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
-
-  for (const version of ['v1', 'v1beta']) {
-    try {
-      let res = await doFetch(version);
-      if (res.status === 429 || res.status === 503) {
-        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-        res = await doFetch(version);
-      }
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const msg = (err as { error?: { message?: string } })?.error?.message ?? `HTTP ${res.status}`;
-        if (res.status === 404 && version === 'v1') continue;
-        throw new Error(`${model} (${version}): ${msg}`);
-      }
-      const data = await res.json() as {
-        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-      };
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-      if (!text) throw new Error(`${model}: empty response`);
-      return text;
-    } catch (e) {
-      if (e instanceof Error && e.name === 'AbortError') {
-        throw new Error(`A API Gemini demorou mais de ${REQUEST_TIMEOUT_MS / 1000}s. Tente um tema mais curto ou tente novamente.`);
-      }
-      throw e;
-    }
-  }
-  throw new Error(`${model}: modelo não disponível (tente outro tema ou mais tarde)`);
 }
 
 const ANNOTATIONS_PROMPT = `
@@ -527,17 +460,12 @@ Exemplo de "annotations" (apenas ilustrativo; respeite as chaves pedidas):
 }
 `;
 
-/**
- * Gera o mapa em UMA única chamada ao Gemini:
- * - Envia: documento (inlineData) + prompt completo (system + instruções + tema + proporção).
- * - Gemini: lê o documento e as instruções e devolve o JSON completo do mapa na mesma resposta.
- * Não há etapa separada de "resumir" e depois "montar"; tudo é feito em um único generateContent.
- */
-export async function generateMindMap(
+/** Monta o texto completo do prompt para geração de mapa (reutilizado por Gemini e Replicate). */
+export function buildMindMapPromptText(
   prompt: string,
-  attachment?: Attachment,
+  attachment?: { name: string } | null,
   options?: GenerateMindMapOptions
-): Promise<MapData> {
+): string {
   const context = attachment
     ? `DOCUMENTO ANEXADO: Analise o arquivo "${attachment.name}" em anexo. O conteúdo do documento (perguntas e respostas, seções, tópicos) deve ser a FONTE PRINCIPAL do mapa. Extraia e organize esse conteúdo em um mapa visual que REFLITA a riqueza e a estrutura do material — não resuma em poucos tópicos; use o documento inteiro para montar o mapa.\n\n`
     : '';
@@ -547,7 +475,6 @@ export async function generateMindMap(
   const disallowedKeys: string[] = [];
   const annotationParts: string[] = [];
   if (askAnnotations) {
-    // Setas serão desenhadas apenas manualmente pelo usuário; NÃO peça mais "arrows" para a IA.
     disallowedKeys.push('"arrows"');
     if (options?.addExtraTexts) {
       annotationParts.push('textos extras (texts)');
@@ -601,131 +528,5 @@ O foco deste mapa é CONTEÚDO TÉCNICO: mais texto, com visuais sempre explicad
     : '';
 
   const sysPrompt = buildSystemPrompt(options?.planLevel);
-  const full = `${sysPrompt}\n\n${context}══════════════════\nTEMA: ${prompt}\n══════════════════${richnessInstruction}${numberingInstruction}${tecnicoInstruction}${annotationInstruction}\n\nRetorne APENAS o JSON completo, sem nenhum texto antes ou depois.`;
-  let lastErr: Error = new Error('No models available');
-
-  for (const model of MODELS) {
-    try {
-      const text = await callModel(model, full, attachment);
-      const cleaned = text
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/\s*```\s*$/i, '')
-        .trim();
-      const parsed = JSON.parse(cleaned) as MapData & { annotations?: MapAnnotations };
-      const data: MapData = {
-        title: parsed.title,
-        description: parsed.description,
-        rootNode: parsed.rootNode,
-        theme: parsed.theme,
-        layoutMode: parsed.layoutMode,
-        connectionStyle: parsed.connectionStyle,
-      };
-      if (parsed.annotations && typeof parsed.annotations === 'object') {
-        data.annotations = {
-          arrows: Array.isArray(parsed.annotations.arrows) ? parsed.annotations.arrows : undefined,
-          texts: Array.isArray(parsed.annotations.texts) ? parsed.annotations.texts : undefined,
-          images: Array.isArray(parsed.annotations.images) ? parsed.annotations.images : undefined,
-        };
-      }
-      console.log(`✓ ${model}`);
-      return data;
-    } catch (e) {
-      lastErr = e instanceof Error ? e : new Error(String(e));
-      console.warn(`✗ ${model}:`, lastErr.message);
-    }
-  }
-  throw lastErr;
+  return `${sysPrompt}\n\n${context}══════════════════\nTEMA: ${prompt}\n══════════════════${richnessInstruction}${numberingInstruction}${tecnicoInstruction}${annotationInstruction}\n\nRetorne APENAS o JSON completo, sem nenhum texto antes ou depois.`;
 }
-
-/** Gera um ÚNICO nó (card) com um visualType específico, a partir de um tema/resumo. */
-export async function generateCardNode(visualType: VisualType, topic: string, planLevel?: 'essencial' | 'creator' | 'pro'): Promise<Partial<MapNode>> {
-  const sysPromptForCard = buildSystemPrompt(planLevel);
-  const prompt = `${sysPromptForCard}
-
-Agora, em vez de um mapa completo, você deve gerar APENAS UM NÓ (um card) para ser inserido em um mapa já existente.
-
-REQUISITOS:
-- O nó deve usar EXATAMENTE o visualType "${visualType}".
-- Tema central do card (em poucas palavras): "${topic}".
-- Crie um conteúdo coerente, útil e DIDÁTICO sobre esse tema.
-- Use PORTUGUÊS BRASILEIRO.
-
-RETORNO:
-- Retorne APENAS um JSON de um objeto compatível com MapNode, contendo no mínimo:
-  {
-    "label": "Título curto do card",
-    "description": "Frase ou texto curto explicando o card (opcional dependendo do tipo)",
-    "icon": "NomeDoÍconeLucide",
-    "type": "leaf",
-    "visualType": "${visualType}",
-    ...campos específicos desse visualType (statValue, bars, steps, listItems, etc.)
-  }
-- NÃO retorne rootNode, nem children do pai. Apenas o objeto do nó.
-- Nenhum texto extra fora do JSON, nenhum markdown.
-`;
-
-  let lastErr: Error = new Error('No models available');
-  for (const model of MODELS) {
-    try {
-      const text = await callModel(model, prompt);
-      const cleaned = text
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/\s*```\s*$/i, '')
-        .trim();
-      const parsed = JSON.parse(cleaned) as Partial<MapNode>;
-      return parsed;
-    } catch (e) {
-      lastErr = e instanceof Error ? e : new Error(String(e));
-      console.warn(`✗ generateCardNode ${model}:`, lastErr.message);
-    }
-  }
-  throw lastErr;
-}
-
-/** Gera um novo nó complementar para um nó existente (usado no botão “+ Conteúdo”). */
-export async function generateNodeExpansion(baseNode: MapNode, planLevel?: 'essencial' | 'creator' | 'pro'): Promise<Partial<MapNode>> {
-  const clone: MapNode = {
-    ...baseNode,
-    children: undefined,
-  };
-  const snippet = JSON.stringify(clone, null, 2);
-  const sysPromptForExpansion = buildSystemPrompt(planLevel);
-  const prompt = `\\
-
-Agora você NÃO vai criar um mapa completo, apenas UM novo nó complementar.
-
-Nó de referência (JSON):
-${snippet}
-
-TAREFA:
-- Crie UM novo nó que aprofunda ou complementa ESPECIFICAMENTE esse nó.
-- O conteúdo deve ser diferente (outro ângulo, exemplo, métrica, insight ou desdobramento).
-- Use o tipo visual que melhor representa esse novo conteúdo, seguindo as mesmas regras.
-
-RESTRIÇÕES:
-- Retorne APENAS o JSON do novo nó, sem campo "id" e sem campo "children".
-- Mantenha todo o texto em português brasileiro.
-- Siga o mesmo schema de MapNode (label, description, type, icon, visualType, e campos específicos).
-`;
-
-  let lastErr: Error = new Error('No models available');
-  for (const model of MODELS) {
-    try {
-      const text = await callModel(model, prompt);
-      const cleaned = text
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/\s*```\s*$/i, '')
-        .trim();
-      const parsed = JSON.parse(cleaned) as Partial<MapNode>;
-      return parsed;
-    } catch (e) {
-      lastErr = e instanceof Error ? e : new Error(String(e));
-      console.warn(`✗ ${model} (expand):`, lastErr.message);
-    }
-  }
-  throw lastErr;
-}
-

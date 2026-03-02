@@ -9,7 +9,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { PromptInput } from '@/components/PromptInput';
 import MapRenderer from '@/components/MapRenderer';
 import { LoadingAnimation } from '@/components/LoadingAnimation';
-import { generateNodeExpansion, generateCardNode } from '@/lib/gemini';
+import { generateNodeExpansion, generateCardNode } from '@/lib/replicate';
 import { getEmptyCardPlaceholder } from '@/lib/cardPreview';
 import { saveGeneration, getGenerations, toggleShareMap } from '@/lib/supabase';
 import { MapData, MapGeneration, LayoutMode, ConnectionStyle, MapNode, VisualType } from '@/lib/types';

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateMindMap } from '@/lib/gemini';
+import { generateMindMap } from '@/lib/replicate';
 import type { LayoutMode } from '@/lib/types';
 
 /** Tempo máximo para a rota (geração com documento pode levar 2–3 min). */
@@ -27,17 +27,13 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const mapData = await generateMindMap(
-      prompt.trim(),
-      attachment,
-      {
-        addExtraTexts: options?.addExtraTexts,
-        addReferenceImages: options?.addReferenceImages,
-        addNumberedSequence: options?.addNumberedSequence,
-        planLevel: options?.planLevel ?? 'essencial',
-        layoutMode: options?.layoutMode,
-      }
-    );
+    const mapData = await generateMindMap(prompt.trim(), attachment, {
+      addExtraTexts: options?.addExtraTexts,
+      addReferenceImages: options?.addReferenceImages,
+      addNumberedSequence: options?.addNumberedSequence,
+      planLevel: options?.planLevel ?? 'essencial',
+      layoutMode: options?.layoutMode,
+    });
     if (options?.layoutMode) mapData.layoutMode = options.layoutMode;
     return NextResponse.json(mapData);
   } catch (err) {
