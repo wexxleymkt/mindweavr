@@ -9,7 +9,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { PromptInput } from '@/components/PromptInput';
 import MapRenderer from '@/components/MapRenderer';
 import { LoadingAnimation } from '@/components/LoadingAnimation';
-import { generateMindMap, generateNodeExpansion, generateCardNode } from '@/lib/gemini';
+import { generateNodeExpansion, generateCardNode } from '@/lib/gemini';
 import { getEmptyCardPlaceholder } from '@/lib/cardPreview';
 import { saveGeneration, getGenerations, toggleShareMap } from '@/lib/supabase';
 import { MapData, MapGeneration, LayoutMode, ConnectionStyle, MapNode, VisualType } from '@/lib/types';
@@ -77,17 +77,29 @@ export default function AppPage() {
     setLoadingPrompt(prompt);
     setCurrentMap(null);
     try {
-      const mapData = await generateMindMap(
-        prompt,
-        options?.attachment,
-        {
-          addExtraTexts: options?.addExtraTexts,
-          addReferenceImages: options?.addReferenceImages,
-          addNumberedSequence: options?.addNumberedSequence,
-          planLevel,
-          layoutMode: options?.layoutMode,
-        }
-      );
+      const res = await fetch('/api/generate-map', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          attachment: options?.attachment
+            ? {
+                base64: options.attachment.base64,
+                mimeType: options.attachment.mimeType,
+                name: options.attachment.name,
+              }
+            : undefined,
+          options: {
+            layoutMode: options?.layoutMode,
+            addExtraTexts: options?.addExtraTexts,
+            addReferenceImages: options?.addReferenceImages,
+            addNumberedSequence: options?.addNumberedSequence,
+            planLevel,
+          },
+        }),
+      });
+      const mapData = await res.json();
+      if (!res.ok) throw new Error(mapData.error || `Erro ${res.status}`);
       if (options?.layoutMode)      mapData.layoutMode     = options.layoutMode;
       if (options?.connectionStyle) mapData.connectionStyle = options.connectionStyle;
       setCurrentMap(mapData);

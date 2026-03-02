@@ -14,7 +14,7 @@ export interface GenerateMindMapOptions {
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 /** Apenas Gemini 2.5 Flash — modelos 1.5 retornam 404 (indisponíveis) na API atual. */
 const MODELS = ['gemini-2.5-flash'];
-const REQUEST_TIMEOUT_MS = 120_000; // 2 min — evita travar sem resposta
+const REQUEST_TIMEOUT_MS = 180_000; // 3 min — documentos grandes podem demorar
 const RETRY_DELAY_MS = 2500;        // espera antes de retry em 429/503
 
 const ICONS = [
