@@ -80,143 +80,121 @@ export function Navbar() {
   };
 
   return (
-    <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }} className={`landing-navbar${scrolled ? ' scrolled' : ''}${menuOpen ? ' menu-open' : ''}`}>
-      <div style={{
-        margin: scrolled ? '0' : '20px auto',
-        maxWidth: scrolled ? '100%' : 1100,
-        padding: scrolled ? '0 32px' : '0 24px',
-        height: 56,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'rgba(10,10,10,0.85)',
-        backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-        borderRadius: scrolled ? 0 : 100,
-        outline: scrolled ? undefined : `1px solid rgba(255,255,255,0.09)`,
-        borderBottom: scrolled ? `1px solid ${C.border}` : undefined,
-        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-      }}>
-        <Link href="/" onClick={e => handleAnchorClick(e as any, '/#hero')}
-          style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 9 }}>
-          <img
-            src="/logo-mindweavr-black.png"
-            alt="MindWeavr"
-            style={{ height: 22, width: 'auto', filter: 'brightness(0) invert(1)', objectFit: 'contain' }}
-          />
-          <span style={{ fontSize: 15, fontWeight: 500, color: C.text, letterSpacing: '-0.02em', fontFamily: fs }}>
-            MindWeavr
-          </span>
-        </Link>
+    <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }} className={`landing-navbar${scrolled ? ' scrolled' : ''}`}>
+      {/* Container único: barra + dropdown integrados (como Creatyx) */}
+      <div
+        className="navbar-inner"
+        style={{
+          position: 'relative',
+          zIndex: 101,
+          margin: scrolled ? 0 : '20px auto',
+          maxWidth: scrolled ? '100%' : 1100,
+          padding: scrolled ? undefined : undefined,
+          minHeight: 56,
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'rgba(10,10,10,0.95)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderRadius: scrolled ? 0 : (menuOpen ? 16 : 100),
+          outline: scrolled ? undefined : `1px solid rgba(255,255,255,0.09)`,
+          borderBottom: scrolled ? `1px solid ${C.border}` : undefined,
+          transition: 'border-radius 0.25s ease',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Barra: logo + links desktop + hamburger */}
+        <div
+          className="navbar-bar-row"
+          style={{
+            height: 56,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+            paddingLeft: scrolled ? 32 : 24,
+            paddingRight: scrolled ? 32 : 24,
+          }}
+        >
+          <Link href="/" onClick={e => handleAnchorClick(e as any, '/#hero')}
+            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 9 }}>
+            <img
+              src="/logo-mindweavr-black.png"
+              alt="MindWeavr"
+              style={{ height: 22, width: 'auto', filter: 'brightness(0) invert(1)', objectFit: 'contain' }}
+            />
+            <span style={{ fontSize: 15, fontWeight: 500, color: C.text, letterSpacing: '-0.02em', fontFamily: fs }}>
+              MindWeavr
+            </span>
+          </Link>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }} className="nav-links">
-          {links.map(l => (
-            <a key={l.label} href={l.href} style={linkStyle}
-              onClick={e => handleAnchorClick(e, l.href)}
-              onMouseEnter={e => (e.currentTarget.style.color = C.text)}
-              onMouseLeave={e => (e.currentTarget.style.color = C.muted)}>
-              {l.label}
-            </a>
-          ))}
-        </nav>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} className="nav-links">
-          {user ? (
-            <Link href="/app" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 13, fontWeight: 500, textDecoration: 'none', fontFamily: fs }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-              Abrir app <ArrowRight size={13} />
-            </Link>
-          ) : (
-            <>
-              <Link href="/login" style={linkStyle}
+          <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }} className="nav-links">
+            {links.map(l => (
+              <a key={l.label} href={l.href} style={linkStyle}
+                onClick={e => handleAnchorClick(e, l.href)}
                 onMouseEnter={e => (e.currentTarget.style.color = C.text)}
                 onMouseLeave={e => (e.currentTarget.style.color = C.muted)}>
-                Entrar
-              </Link>
-              <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 13, fontWeight: 500, textDecoration: 'none', fontFamily: fs }}
+                {l.label}
+              </a>
+            ))}
+          </nav>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }} className="nav-links">
+            {user ? (
+              <Link href="/app" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 13, fontWeight: 500, textDecoration: 'none', fontFamily: fs }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                Começar agora
+                Abrir app <ArrowRight size={13} />
               </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link href="/login" style={linkStyle}
+                  onMouseEnter={e => (e.currentTarget.style.color = C.text)}
+                  onMouseLeave={e => (e.currentTarget.style.color = C.muted)}>
+                  Entrar
+                </Link>
+                <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 100, background: C.text, color: C.bg, fontSize: 13, fontWeight: 500, textDecoration: 'none', fontFamily: fs }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+                  Começar agora
+                </Link>
+              </>
+            )}
+          </div>
+
+          <button
+            type="button"
+            aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+            onClick={() => setMenuOpen(o => !o)}
+            className="mobile-btn"
+            style={{ display: 'none', background: 'none', border: `1px solid ${C.border}`, color: C.muted, cursor: 'pointer', borderRadius: 100, padding: 10 }}>
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
 
-        <button
-          type="button"
-          aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-          onClick={() => setMenuOpen(o => !o)}
-          className="mobile-btn"
-          style={{ display: 'none', background: 'none', border: `1px solid ${C.border}`, color: C.muted, cursor: 'pointer', borderRadius: 100, padding: 10 }}>
-          {menuOpen ? <X size={18} /> : <Menu size={18} />}
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <>
+        {/* Dropdown integrado à navbar (só no mobile, dentro do mesmo bloco) */}
+        <AnimatePresence>
+          {menuOpen && (
             <motion.div
-              role="presentation"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              onClick={closeMenu}
-              className="navbar-overlay"
-              style={{
-                position: 'fixed',
-                top: 56,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0,0,0,0.45)',
-                zIndex: 99,
-                boxShadow: 'none',
-              }}
-            />
-            <motion.div
-              className="navbar-mobile-menu"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{
-                position: 'fixed',
-                top: 56,
-                left: 0,
-                right: 0,
-                zIndex: 101,
-                maxHeight: 'calc(100vh - 56px)',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-              }}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              style={{ overflow: 'hidden', borderTop: `1px solid ${C.border}` }}
+              className="navbar-dropdown"
             >
-              <div
-                className="navbar-mobile-menu-inner"
-                style={{
-                  background: C.bg,
-                  borderTop: `1px solid ${C.border}`,
-                  borderLeft: `1px solid ${C.border}`,
-                  borderRight: `1px solid ${C.border}`,
-                  borderBottom: `1px solid ${C.border}`,
-                  padding: '12px 0 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderRadius: 0,
-                  boxShadow: 'none',
-                  WebkitBoxShadow: 'none',
-                }}
-              >
+              <div style={{ padding: '8px 0 16px', display: 'flex', flexDirection: 'column' }}>
                 {links.map(l => (
                   <a
                     key={l.label}
                     href={l.href}
                     onClick={e => { handleAnchorClick(e, l.href); closeMenu(); }}
-                    className="navbar-mobile-link"
                     style={{
                       fontSize: 15,
                       color: C.text,
                       textDecoration: 'none',
                       fontFamily: fs,
-                      padding: '14px 20px',
+                      padding: '12px 24px',
                       borderBottom: `1px solid ${C.border}`,
                       background: 'transparent',
                       transition: 'background 0.15s',
@@ -230,10 +208,9 @@ export function Navbar() {
                 <a
                   href="/#pricing"
                   onClick={e => { handleAnchorClick(e, '/#pricing'); closeMenu(); }}
-                  className="navbar-mobile-cta"
                   style={{
                     display: 'block',
-                    margin: '16px 20px 0',
+                    margin: '16px 24px 0',
                     padding: '14px 16px',
                     background: C.text,
                     color: C.bg,
@@ -242,57 +219,59 @@ export function Navbar() {
                     textDecoration: 'none',
                     textAlign: 'center',
                     fontFamily: fs,
+                    borderRadius: 8,
                   }}
                 >
                   Começar agora →
                 </a>
               </div>
             </motion.div>
-          </>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Overlay só quando menu aberto no mobile (escurece o fundo) */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            role="presentation"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            onClick={closeMenu}
+            className="navbar-overlay"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.4)',
+              zIndex: 99,
+            }}
+          />
         )}
       </AnimatePresence>
       <style>{`
         @media (max-width: 760px) {
           .nav-links { display: none !important; }
           .mobile-btn { display: flex !important; align-items: center; justify-content: center; }
-          .landing-navbar > div {
+          .landing-navbar .navbar-inner {
             margin: 12px 16px !important;
-            padding: 0 16px !important;
             max-width: none !important;
-            border-radius: 100px !important;
           }
-          .landing-navbar.scrolled > div {
+          .landing-navbar .navbar-inner .navbar-bar-row { padding-left: 16px !important; padding-right: 16px !important; }
+          .landing-navbar.scrolled .navbar-inner {
             margin: 0 !important;
-            padding: 0 16px !important;
-            border-radius: 0 !important;
-          }
-          .landing-navbar.menu-open > div {
-            border-radius: 0 !important;
           }
         }
         @media (min-width: 761px) {
-          .navbar-overlay, .navbar-mobile-menu { display: none !important; }
-        }
-        .navbar-mobile-menu-inner,
-        .navbar-mobile-menu-inner *,
-        .navbar-mobile-link,
-        .navbar-mobile-cta {
-          border-radius: 0 !important;
-          -webkit-border-radius: 0 !important;
-          box-shadow: none !important;
-          -webkit-box-shadow: none !important;
-          -moz-box-shadow: none !important;
-          outline: none !important;
-        }
-        .navbar-mobile-menu-inner {
-          -webkit-tap-highlight-color: transparent;
-          box-shadow: none !important;
-          -webkit-box-shadow: none !important;
+          .navbar-overlay { display: none !important; }
         }
         .navbar-overlay {
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
-          box-shadow: none !important;
         }
       `}</style>
     </header>
