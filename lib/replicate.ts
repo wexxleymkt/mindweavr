@@ -55,7 +55,13 @@ async function runGeminiReplicate(
   }
 
   if (typeof output === 'string') return output;
-  if (Array.isArray(output)) return output.join('');
+  if (Array.isArray(output)) return output.map((c) => (typeof c === 'string' ? c : String(c ?? ''))).join('');
+  if (output != null && typeof output === 'object' && 'output' in output && typeof (output as { output: unknown }).output === 'string') {
+    return (output as { output: string }).output;
+  }
+  if (output != null && typeof output === 'object' && 'text' in output && typeof (output as { text: unknown }).text === 'string') {
+    return (output as { text: string }).text;
+  }
   if (output != null && typeof (output as { toString?: () => string }).toString === 'function') {
     return (output as { toString: () => string }).toString();
   }

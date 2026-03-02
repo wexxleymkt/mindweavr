@@ -109,19 +109,22 @@ export default function AppPage() {
       if (options?.connectionStyle) mapData.connectionStyle = options.connectionStyle;
       setCurrentMap(mapData);
       setCurrentPrompt(prompt);
-      const saved = await saveGeneration(mapData.title, prompt, mapData, user?.id);
-      if (saved) {
-        setCurrentMapId(saved.id);
-        setGenerations(prev => [saved, ...prev]);
-      }
-      toast.success(mapData.title, { description: 'Mapa criado e salvo' });
-      setTimeout(() => setIsLoading(false), 320);
+      setIsLoading(false);
+      toast.success(mapData.title, { description: 'Mapa criado' });
+      saveGeneration(mapData.title, prompt, mapData, user?.id).then((saved) => {
+        if (saved) {
+          setCurrentMapId(saved.id);
+          setGenerations(prev => [saved, ...prev]);
+        }
+      }).catch(() => { /* salvar em segundo plano; falha não bloqueia a UI */ });
     } catch (err) {
       const msg = err instanceof Error
         ? (err.name === 'AbortError' ? 'A geração demorou mais de 5 minutos. Tente um tema mais curto ou tente novamente.' : err.message)
         : 'Erro desconhecido';
       setError(msg);
       toast.error('Erro ao gerar mapa', { description: msg });
+      setIsLoading(false);
+    } finally {
       setIsLoading(false);
     }
   }, [user?.id]);
