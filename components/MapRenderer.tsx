@@ -1038,13 +1038,14 @@ export default function MapRenderer({
         />
 
         {/* Wrapper com pointer-events: none para que cliques em área vazia passem para a camada de desenho/container; cards com pointer-events: auto */}
+        {/* Posição do card = layout + baseOffsets apenas; o delta do arrasto fica só no transform do Framer (evita duplicar movimento) */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none' }}>
           <AnimatePresence>
             {nodes.map((node, i) => {
-              const drag    = getTotalOffset(node.id);
+              const baseOnly = baseOffsets[node.id] ?? { x: 0, y: 0 };
               const rawNode = applyOverride(
                 node.id,
-                { ...node, x: node.x + PADDING + drag.x, y: node.y + PADDING + drag.y } as unknown as Record<string, unknown>,
+                { ...node, x: node.x + PADDING + baseOnly.x, y: node.y + PADDING + baseOnly.y } as unknown as Record<string, unknown>,
                 overrides
               );
               return (
