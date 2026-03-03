@@ -215,10 +215,19 @@ export function CardShell({
       dragElastic={0}
       onDrag={(_, info) => onDrag?.(node.id, info.offset)}
       onDragEnd={(_, info) => onDragEnd?.(node.id, info.offset)}
-      /* ── Hover + pointer capture ── */
+      /* ── Hover + pointer capture (evita soltar o card ao sair da área) ── */
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      onPointerDown={e => e.stopPropagation()}
+      onPointerDown={e => {
+        e.stopPropagation();
+        if (onDrag && e.button === 0) (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      }}
+      onPointerUp={e => {
+        try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* já liberado */ }
+      }}
+      onPointerCancel={e => {
+        try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* já liberado */ }
+      }}
       style={{
         position: 'absolute',
         left: 0,
